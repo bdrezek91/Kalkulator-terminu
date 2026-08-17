@@ -59,7 +59,10 @@ ALLOWED_IMPORT_EXTENSIONS = [".xlsx"]
 
 
 class ImportUploadForm(forms.Form):
-    file = forms.FileField(label="Plik XLSX z Optimy")
+    file = forms.FileField(
+        label="Plik XLSX z Optimy",
+        widget=forms.ClearableFileInput(attrs={"class": "form-control"}),
+    )
 
     def clean_file(self):
         f = self.cleaned_data["file"]

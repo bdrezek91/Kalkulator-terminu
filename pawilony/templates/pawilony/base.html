@@ -1,29 +1,138 @@
 {% load static %}<!DOCTYPE html>
-<html lang="pl">
+<html lang="pl" data-bs-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}Kalkulator terminu pawilonu{% endblock %}</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{% static 'pawilony/vendor/bootstrap.min.css' %}" rel="stylesheet">
     <style>
-        body { background-color: #f7f8fa; }
-        .navbar-brand { font-weight: 600; }
-        .result-highlight { font-size: 1.75rem; font-weight: 700; }
-        .card { box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+        /*
+         * Szata graficzna dopasowana do marki Dampol Investment (spójna z Multiplekserem):
+         * ciemne, niemal czarne tło + złoty akcent, pogrubione nagłówki z odstępami między literami.
+         * Oparta o natywny tryb ciemny Bootstrapa 5.3 (data-bs-theme="dark") — kontrast tekstu
+         * i tła komponentów (karty, formularze, tabele) obsługuje Bootstrap, tu nadpisujemy
+         * tylko zmienne motywu na paletę marki.
+         */
+        :root, [data-bs-theme="dark"] {
+            --dampol-gold: #C9A227;
+            --dampol-gold-light: #E0C158;
+            --dampol-header: #0d0d0d;
+
+            --bs-body-bg: #121212;
+            --bs-body-color: #eae7e1;
+            --bs-secondary-color: #9c988f;
+            --bs-emphasis-color: #ffffff;
+            --bs-border-color: rgba(255, 255, 255, 0.12);
+            --bs-border-color-translucent: rgba(255, 255, 255, 0.12);
+            --bs-tertiary-bg: #1a1a1a;
+
+            --bs-primary: #C9A227;
+            --bs-primary-rgb: 201, 162, 39;
+            --bs-link-color: #E0C158;
+            --bs-link-color-rgb: 224, 193, 88;
+            --bs-link-hover-color: #C9A227;
+            --bs-link-hover-color-rgb: 201, 162, 39;
+
+            --bs-card-bg: #1a1a1a;
+            --bs-card-color: #eae7e1;
+            --bs-card-border-color: rgba(255, 255, 255, 0.08);
+
+            --bs-table-bg: transparent;
+            --bs-table-color: #eae7e1;
+            --bs-table-border-color: rgba(255, 255, 255, 0.1);
+            --bs-table-striped-bg: rgba(255, 255, 255, 0.035);
+
+            --bs-btn-focus-box-shadow: 0 0 0 0.2rem rgba(201, 162, 39, 0.35);
+        }
+
+        body { background-color: var(--bs-body-bg); }
+
+        h1, h2, h3, h4, h5, h6 { font-weight: 700; letter-spacing: 0.02em; }
+
+        .navbar {
+            background-color: var(--dampol-header) !important;
+            border-bottom: 1px solid var(--dampol-gold);
+        }
+        .navbar-brand { font-weight: 700; letter-spacing: 0.03em; }
+        .navbar .app-subtitle { color: var(--bs-secondary-color); }
+        .navbar .nav-link { color: var(--bs-secondary-color) !important; transition: color .15s ease; }
+        .navbar .nav-link:hover { color: var(--dampol-gold-light) !important; }
+        .navbar .nav-link.active { color: var(--dampol-gold) !important; }
+
+        .card { box-shadow: 0 1px 3px rgba(0, 0, 0, .4); }
+
+        .result-highlight { font-size: 1.75rem; font-weight: 700; letter-spacing: 0.01em; }
+        .text-primary { color: var(--dampol-gold-light) !important; }
+        .border-primary { border-color: var(--dampol-gold) !important; }
+
+        .btn-primary {
+            --bs-btn-color: var(--dampol-header);
+            --bs-btn-bg: var(--dampol-gold);
+            --bs-btn-border-color: var(--dampol-gold);
+            --bs-btn-hover-color: var(--dampol-header);
+            --bs-btn-hover-bg: var(--dampol-gold-light);
+            --bs-btn-hover-border-color: var(--dampol-gold-light);
+            --bs-btn-active-color: var(--dampol-header);
+            --bs-btn-active-bg: var(--dampol-gold-light);
+            --bs-btn-active-border-color: var(--dampol-gold-light);
+            --bs-btn-disabled-bg: var(--dampol-gold);
+            --bs-btn-disabled-border-color: var(--dampol-gold);
+            font-weight: 600;
+            letter-spacing: 0.02em;
+        }
+        .btn-outline-light {
+            --bs-btn-hover-color: var(--dampol-header);
+            --bs-btn-hover-bg: var(--dampol-gold);
+            --bs-btn-hover-border-color: var(--dampol-gold);
+            --bs-btn-active-color: var(--dampol-header);
+            --bs-btn-active-bg: var(--dampol-gold);
+            --bs-btn-active-border-color: var(--dampol-gold);
+        }
+        .btn-outline-secondary {
+            --bs-btn-hover-color: var(--dampol-header);
+            --bs-btn-hover-bg: var(--dampol-gold-light);
+            --bs-btn-hover-border-color: var(--dampol-gold-light);
+        }
+        .btn-success { --bs-btn-bg: #3a7d52; --bs-btn-border-color: #3a7d52; --bs-btn-hover-bg: #45934f; --bs-btn-hover-border-color: #45934f; }
+
+        .table-warning, .table-warning > * { --bs-table-bg: rgba(201, 162, 39, 0.18); }
+
+        .form-check-input:checked { background-color: var(--dampol-gold); border-color: var(--dampol-gold); }
+        .form-check-input:focus { border-color: var(--dampol-gold); }
+        .form-select:focus, .form-control:focus { border-color: var(--dampol-gold); }
+
+        .alert-warning { background-color: #332a0c; color: var(--dampol-gold-light); border-color: #5c4a12; }
+        .alert-danger { background-color: #3a1414; color: #ff8a80; border-color: #5c1f1f; }
+        .alert-secondary { background-color: #202020; color: var(--bs-secondary-color); border-color: rgba(255, 255, 255, 0.12); }
+        .alert-success { background-color: #123b21; color: #8fd6a5; border-color: #1e5c34; }
+        .alert-info { background-color: #0f2f3a; color: #8fd0e0; border-color: #1a4d5c; }
+
+        .badge.bg-success { background-color: #3a7d52 !important; }
+
+        code { color: var(--dampol-gold-light); }
     </style>
     {% block extra_head %}{% endblock %}
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
-    <div class="container">
-        <a class="navbar-brand" href="{% url 'pawilony:calculator' %}">Kalkulator terminu pawilonu</a>
+<nav class="navbar navbar-expand-lg navbar-dark mb-4">
+    <div class="container flex-wrap">
+        <a class="navbar-brand d-flex align-items-center" href="{% url 'pawilony:calculator' %}">
+            <svg viewBox="0 0 620 172" role="img" aria-label="Dampol Investment" style="height: 30px; width: auto; display: block;">
+                <text x="310" y="118" text-anchor="middle" font-family="Arial, Helvetica, sans-serif"
+                      font-weight="700" font-size="122" letter-spacing="1"
+                      fill="none" stroke="#C9A227" stroke-width="3.5">DAMPOL</text>
+                <text x="317" y="160" text-anchor="middle" font-family="Arial, Helvetica, sans-serif"
+                      font-weight="500" font-size="25" letter-spacing="14" fill="#C9A227">INVESTMENT</text>
+            </svg>
+            <span class="app-subtitle small ms-2 d-none d-sm-inline">Kalkulator terminu pawilonu</span>
+        </a>
         <ul class="nav">
             <li class="nav-item">
-                <a class="nav-link {% if request.resolver_match.url_name == 'calculator' %}active fw-semibold text-white{% else %}text-white-50{% endif %}"
+                <a class="nav-link {% if request.resolver_match.url_name == 'calculator' %}active{% endif %}"
                    href="{% url 'pawilony:calculator' %}">Kalkulator</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link {% if request.resolver_match.url_name == 'backlog_summary' %}active fw-semibold text-white{% else %}text-white-50{% endif %}"
+                <a class="nav-link {% if request.resolver_match.url_name == 'backlog_summary' %}active{% endif %}"
                    href="{% url 'pawilony:backlog_summary' %}">Obciążenie kolejki</a>
             </li>
         </ul>
