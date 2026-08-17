@@ -1,0 +1,110 @@
+{% extends "pawilony/base.html" %}
+{% block content %}
+<h1 class="h5 mb-3">Podgląd importu: {{ batch.original_filename }}</h1>
+<p>
+    Status: <strong>{{ batch.get_status_display }}</strong>
+    {% if batch.is_active_snapshot %}<span class="badge bg-success">aktywna migawka</span>{% endif %}
+</p>
+
+{% if report.error %}
+    <div class="alert alert-danger">{{ report.error }}</div>
+{% else %}
+
+<div class="row mb-4">
+    <div class="col-md-3"><div class="card"><div class="card-body">
+        <div class="text-muted small">Wszystkie wiersze</div><div class="h5">{{ report.total_rows }}</div>
+    </div></div></div>
+    <div class="col-md-3"><div class="card"><div class="card-body">
+        <div class="text-muted small">Aktywne (bez konfliktów)</div><div class="h5">{{ report.active_count }}</div>
+    </div></div></div>
+    <div class="col-md-3"><div class="card"><div class="card-body">
+        <div class="text-muted small">Zakończone</div><div class="h5">{{ report.ended_count }}</div>
+    </div></div></div>
+    <div class="col-md-3"><div class="card"><div class="card-body">
+        <div class="text-muted small">Konflikty</div><div class="h5 text-danger">{{ report.conflict_count }}</div>
+    </div></div></div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-3"><div class="card"><div class="card-body">
+        <div class="text-muted small">Pominięte moduły 2+</div><div class="h5">{{ report.module_skipped_count }}</div>
+    </div></div></div>
+    <div class="col-md-3"><div class="card"><div class="card-body">
+        <div class="text-muted small">Duplikaty aktywnego kodu</div><div class="h5">{{ report.duplicate_count }}</div>
+    </div></div></div>
+    <div class="col-md-3"><div class="card"><div class="card-body">
+        <div class="text-muted small">Nierozpoznane wartości</div><div class="h5">{{ report.unrecognized_values|length }}</div>
+    </div></div></div>
+    <div class="col-md-3"><div class="card"><div class="card-body">
+        <div class="text-muted small">Standardowe / niestandardowe</div><div class="h5">{{ report.standard_count }} / {{ report.custom_count }}</div>
+    </div></div></div>
+</div>
+
+{% if report.missing_columns %}
+<div class="alert alert-danger">Brak wymaganych kolumn: {{ report.missing_columns|join:", " }}</div>
+{% endif %}
+{% if not report.fibo_column_present or not report.boazeria_column_present %}
+<div class="alert alert-warning">
+    Eksport nie zawiera kolumn:
+    {% if not report.fibo_column_present %}FIBO{% endif %}
+    {% if not report.fibo_column_present and not report.boazeria_column_present %} i {% endif %}
+    {% if not report.boazeria_column_present %}BOAZERIA{% endif %}
+    — obciążenie tej brygady może być zaniżone bez ręcznej korekty w konfiguracji.
+</div>
+{% endif %}
+{% if report.unrecognized_headers %}
+<div class="alert alert-secondary small">Nierozpoznane nagłówki (zignorowane): {{ report.unrecognized_headers|join:", " }}</div>
+{% endif %}
+
+<h2 class="h6 mt-4">Suma godzin liczonych do backlogu</h2>
+<ul>
+    <li>Hydraulicy: {{ report.counted_hydraulic_hours }} h</li>
+    <li>Spawacze: {{ report.counted_welding_hours }} h</li>
+    <li>FIBO/boazeria: {{ report.counted_fibo_wood_hours }} h</li>
+</ul>
+
+{% if report.conflicts %}
+<h2 class="h6 mt-4">Konflikty wymagające reakcji ({{ report.conflicts|length }})</h2>
+<div class="table-responsive">
+<table class="table table-sm table-striped">
+    <thead><tr><th>Wiersz</th><th>Kod</th><th>Nazwa</th><th>Powody</th></tr></thead>
+    <tbody>
+    {% for c in report.conflicts|slice:":200" %}
+        <tr><td>{{ c.row }}</td><td>{{ c.kod }}</td><td>{{ c.nazwa }}</td><td>{{ c.powody|join:"; " }}</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% if report.conflicts|length > 200 %}<p class="text-muted small">Pokazano pierwsze 200 z {{ report.conflicts|length }}.</p>{% endif %}
+</div>
+{% endif %}
+
+{% if report.unrecognized_values %}
+<h2 class="h6 mt-4">Nierozpoznane wartości ({{ report.unrecognized_values|length }})</h2>
+<div class="table-responsive">
+<table class="table table-sm table-striped">
+    <thead><tr><th>Wiersz</th><th>Kod</th><th>Pole</th><th>Wartość</th></tr></thead>
+    <tbody>
+    {% for u in report.unrecognized_values|slice:":200" %}
+        <tr><td>{{ u.row }}</td><td>{{ u.kod }}</td><td>{{ u.pole }}</td><td>{{ u.wartosc }}</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% if report.unrecognized_values|length > 200 %}<p class="text-muted small">Pokazano pierwsze 200 z {{ report.unrecognized_values|length }}.</p>{% endif %}
+</div>
+{% endif %}
+
+{% if batch.status == "VALIDATED" %}
+<div class="mt-4">
+    <form method="post" action="{% url 'pawilony:import_confirm' pk=batch.pk %}" class="d-inline">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-success" onclick="return confirm('Zatwierdzić import jako nową aktywną migawkę?');">Zatwierdź import</button>
+    </form>
+    <form method="post" action="{% url 'pawilony:import_reject' pk=batch.pk %}" class="d-inline">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-outline-danger">Odrzuć</button>
+    </form>
+</div>
+{% endif %}
+
+{% endif %}
+{% endblock %}

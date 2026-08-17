@@ -1,0 +1,164 @@
+{% extends "pawilony/base.html" %}
+{% block content %}
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h1 class="h4 mb-3">Kalkulator terminu pawilonu</h1>
+                <p class="text-muted">Zaznacz wyposażenie nowego pawilonu, aby otrzymać najwcześniejszy bezpieczny termin realizacji.</p>
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    <h2 class="h6 text-uppercase text-muted mt-4">Hydraulika</h2>
+                    <div class="mb-3">
+                        <label class="form-label">{{ form.kuchnia.label }}</label>
+                        {{ form.kuchnia }}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">{{ form.toaleta.label }}</label>
+                        {{ form.toaleta }}
+                        <div class="form-text">Nieaktywne, jeśli wybrano łazienkę — łazienka jest kompletem.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">{{ form.lazienka.label }}</label>
+                        {{ form.lazienka }}
+                    </div>
+                    <div class="form-check mb-3">
+                        {{ form.prysznic }}
+                        <label class="form-check-label" for="{{ form.prysznic.id_for_label }}">{{ form.prysznic.label }}</label>
+                        <div class="form-text">Nieaktywne, jeśli wybrano łazienkę.</div>
+                    </div>
+
+                    <h2 class="h6 text-uppercase text-muted mt-4">Konstrukcja</h2>
+                    <div class="form-check mb-2">
+                        {{ form.pelna_statyka }}
+                        <label class="form-check-label" for="{{ form.pelna_statyka.id_for_label }}">{{ form.pelna_statyka.label }}</label>
+                    </div>
+                    <div class="form-check mb-3">
+                        {{ form.kratownica }}
+                        <label class="form-check-label" for="{{ form.kratownica.id_for_label }}">{{ form.kratownica.label }}</label>
+                    </div>
+
+                    <h2 class="h6 text-uppercase text-muted mt-4">Wykończenie</h2>
+                    <div class="form-check mb-2">
+                        {{ form.fibo }}
+                        <label class="form-check-label" for="{{ form.fibo.id_for_label }}">{{ form.fibo.label }}</label>
+                    </div>
+                    <div class="form-check mb-3">
+                        {{ form.boazeria }}
+                        <label class="form-check-label" for="{{ form.boazeria.id_for_label }}">{{ form.boazeria.label }}</label>
+                    </div>
+
+                    <h2 class="h6 text-uppercase text-muted mt-4">Elementy dodatkowe (informacyjnie)</h2>
+                    <div class="form-check mb-2">
+                        {{ form.stolarka_nst }}
+                        <label class="form-check-label" for="{{ form.stolarka_nst.id_for_label }}">{{ form.stolarka_nst.label }}</label>
+                    </div>
+                    <div class="form-check mb-2">
+                        {{ form.zaluzje_fasadowe }}
+                        <label class="form-check-label" for="{{ form.zaluzje_fasadowe.id_for_label }}">{{ form.zaluzje_fasadowe.label }}</label>
+                    </div>
+                    <div class="form-check mb-4">
+                        {{ form.rolety }}
+                        <label class="form-check-label" for="{{ form.rolety.id_for_label }}">{{ form.rolety.label }}</label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg w-100">Oblicz najwcześniejszy termin</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        {% if result %}
+        <div class="card mb-4 border-primary">
+            <div class="card-body">
+                <h2 class="h5">Wynik</h2>
+                <p class="result-highlight text-primary mb-1">
+                    Tydzień {{ result.iso_week }}/{{ result.iso_year }}
+                </p>
+                <p class="mb-3">
+                    od {{ result.week_start|date:"d.m.Y" }} do {{ result.week_end|date:"d.m.Y" }}
+                </p>
+                <p>Wąskie gardło: <strong>{{ bottleneck_label }}</strong></p>
+
+                <table class="table table-sm mt-3">
+                    <thead>
+                        <tr><th>Brygada</th><th>Wymagany tydzień</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for row in brigade_rows %}
+                        <tr class="{% if row.is_bottleneck %}table-warning{% endif %}">
+                            <td>{{ row.label }}</td>
+                            <td>
+                                {% if row.required or row.key == "base" %}
+                                    tydzień {{ row.weeks }}
+                                    {% if row.is_bottleneck %} — wąskie gardło{% endif %}
+                                {% else %}
+                                    nie dotyczy (brak wyposażenia tej brygady)
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <h3 class="h6 mt-4">Godziny nowego pawilonu wg brygad</h3>
+                <ul>
+                    <li>Hydraulicy: {{ hours_result.hydraulic_hours }} h</li>
+                    <li>Spawacze: {{ hours_result.welding_hours }} h</li>
+                    <li>FIBO/boazeria: {{ hours_result.fibo_wood_hours }} h</li>
+                    <li class="text-muted">Informacyjnie (nie ogranicza terminu w MVP): {{ hours_result.informational_hours }} h</li>
+                </ul>
+
+                <hr>
+                <p class="small text-muted mb-1">
+                    {% if last_import_at %}
+                        Dane aktualne na: {{ last_import_at|date:"d.m.Y H:i" }}
+                    {% else %}
+                        Brak zatwierdzonego importu — wynik oparty wyłącznie o ręczne korekty backlogu.
+                    {% endif %}
+                </p>
+                {% if data_is_stale %}
+                <div class="alert alert-warning small mt-2 mb-1">
+                    Uwaga: dane mogą być nieaktualne (starsze niż {{ stale_threshold_hours }} godz.).
+                </div>
+                {% endif %}
+                {% if fibo_wood_may_be_understated %}
+                <div class="alert alert-warning small mt-2 mb-1">
+                    Uwaga: eksport nie zawiera jeszcze kolumn FIBO/boazerii i nie wprowadzono ręcznej korekty —
+                    termin dla brygady FIBO/boazeria może być zaniżony.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% else %}
+        <div class="card">
+            <div class="card-body text-muted">
+                Wypełnij formularz i kliknij „Oblicz najwcześniejszy termin”, aby zobaczyć wynik.
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+{% block extra_head %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    var lazienka = document.getElementById("id_lazienka");
+    var toaleta = document.getElementById("id_toaleta");
+    var prysznic = document.getElementById("id_prysznic");
+    function sync() {
+        var complete = lazienka && lazienka.value !== "";
+        if (toaleta) toaleta.disabled = complete;
+        if (prysznic) prysznic.disabled = complete;
+        if (complete && prysznic) prysznic.checked = false;
+        if (complete && toaleta) toaleta.value = "";
+    }
+    if (lazienka) {
+        lazienka.addEventListener("change", sync);
+        sync();
+    }
+});
+</script>
+{% endblock %}

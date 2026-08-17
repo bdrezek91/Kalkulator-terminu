@@ -1,0 +1,90 @@
+{% extends "pawilony/base.html" %}
+{% block content %}
+<h1 class="h4 mb-4">Panel administratora</h1>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card"><div class="card-body">
+            <div class="text-muted small">Aktywna migawka</div>
+            <div class="h5">{% if active_batch %}{{ active_batch.original_filename }}{% else %}brak{% endif %}</div>
+            {% if active_batch %}<div class="small text-muted">z {{ active_batch.committed_at|date:"d.m.Y H:i" }}</div>{% endif %}
+        </div></div>
+    </div>
+    <div class="col-md-3">
+        <div class="card"><div class="card-body">
+            <div class="text-muted small">Aktywne pawilony w kolejce</div>
+            <div class="h5">{{ backlog.base_units }}</div>
+        </div></div>
+    </div>
+    <div class="col-md-3">
+        <div class="card"><div class="card-body">
+            <div class="text-muted small">Standardowe / niestandardowe</div>
+            <div class="h5">{{ standard_count }} / {{ custom_count }}</div>
+        </div></div>
+    </div>
+    <div class="col-md-3">
+        <div class="card"><div class="card-body">
+            <div class="text-muted small">Aktywna konfiguracja mocy</div>
+            <div class="h5">{% if config %}{{ config.name }}{% else %}<span class="text-danger">brak</span>{% endif %}</div>
+        </div></div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <h2 class="h6">Suma godzin backlogu wg brygad (wliczając ręczne korekty)</h2>
+        <table class="table table-sm">
+            <thead><tr><th>Brygada</th><th>Godziny</th></tr></thead>
+            <tbody>
+                <tr><td>Hydraulicy</td><td>{{ backlog.hydraulic_hours }} h</td></tr>
+                <tr><td>Spawacze</td><td>{{ backlog.welding_hours }} h</td></tr>
+                <tr><td>FIBO/boazeria</td><td>{{ backlog.fibo_wood_hours }} h</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="h6">Import danych</h2>
+                <a class="btn btn-primary" href="{% url 'pawilony:import_upload' %}">Nowy import XLSX</a>
+                <a class="btn btn-outline-secondary" href="{% url 'pawilony:import_history' %}">Historia importów</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="h6">Konfiguracja</h2>
+                <p class="small text-muted">Czasy operacji, moce produkcyjne, bufor i ręczne korekty edytujesz w panelu Django.</p>
+                <a class="btn btn-outline-secondary" href="/django-admin/pawilony/operationtime/">Czasy operacji</a>
+                <a class="btn btn-outline-secondary" href="/django-admin/pawilony/capacityconfiguration/">Moce produkcyjne</a>
+                <a class="btn btn-outline-secondary" href="/django-admin/pawilony/manualbacklogadjustment/">Ręczne korekty</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <h2 class="h6">Ostatnie importy</h2>
+        <table class="table table-sm">
+            <thead><tr><th>Plik</th><th>Data</th><th>Status</th><th></th></tr></thead>
+            <tbody>
+            {% for b in recent_batches %}
+                <tr>
+                    <td>{{ b.original_filename }}</td>
+                    <td>{{ b.uploaded_at|date:"d.m.Y H:i" }}</td>
+                    <td>{{ b.get_status_display }}{% if b.is_active_snapshot %} — aktywna{% endif %}</td>
+                    <td><a href="{% url 'pawilony:import_preview' pk=b.pk %}">szczegóły</a></td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="4" class="text-muted">Brak importów.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

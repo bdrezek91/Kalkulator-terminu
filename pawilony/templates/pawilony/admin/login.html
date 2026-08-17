@@ -1,0 +1,28 @@
+{% extends "pawilony/base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="card">
+            <div class="card-body">
+                <h1 class="h5 mb-3">Logowanie administratora</h1>
+                <form method="post">
+                    {% csrf_token %}
+                    {% if form.errors %}
+                        <div class="alert alert-danger">Nieprawidłowa nazwa użytkownika lub hasło.</div>
+                    {% endif %}
+                    <div class="mb-3">
+                        <label class="form-label">Nazwa użytkownika</label>
+                        {{ form.username }}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Hasło</label>
+                        {{ form.password }}
+                    </div>
+                    <input type="hidden" name="next" value="{{ next }}">
+                    <button type="submit" class="btn btn-primary w-100">Zaloguj</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
