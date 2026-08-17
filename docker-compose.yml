@@ -1,6 +1,7 @@
 services:
   db:
     image: postgres:16-alpine
+    container_name: kalkulator-db
     restart: unless-stopped
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-kalkulator}
@@ -17,6 +18,7 @@ services:
 
   web:
     build: .
+    container_name: kalkulator-web
     restart: unless-stopped
     env_file:
       - .env
@@ -26,7 +28,11 @@ services:
       db:
         condition: service_healthy
     ports:
-      - "${WEB_PORT:-8010}:8000"
+      # Wystawione tylko lokalnie na hoście — do debugowania (curl 127.0.0.1:${WEB_PORT}).
+      # Ruch publiczny idzie przez zewnętrzny reverse proxy (np. współdzielony Caddy),
+      # podłączony do sieci `kalkulator_default` poleceniem `docker network connect`
+      # (patrz README, sekcja "Wdrożenie za współdzielonym reverse proxy").
+      - "127.0.0.1:${WEB_PORT:-8010}:8000"
     volumes:
       - media_data:/app/media
     healthcheck:
@@ -35,6 +41,10 @@ services:
       timeout: 10s
       retries: 3
       start_period: 20s
+
+networks:
+  default:
+    name: kalkulator_default
 
 volumes:
   postgres_data:

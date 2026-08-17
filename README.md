@@ -103,6 +103,53 @@ panelu administratora, brak wycieku numerów projektów na stronie publicznej �
 oraz **test akceptacyjny na kopii wzorcowego pliku** `fixtures/wykaz_pawilonow_wzorcowy.xlsx`
 (4447 wierszy, plik nigdy nie jest modyfikowany, tylko odczytywany).
 
+## Wdrożenie za współdzielonym reverse proxy (Caddy w Dockerze)
+
+Jeśli na VPS masz już działający kontener Caddy obsługujący inne aplikacje
+(porty 80/443 zajęte przez ten kontener), **nie** wystawiaj portu kalkulatora
+publicznie — zamiast tego podłącz Caddy do sieci Docker naszej aplikacji.
+
+1. **Sklonuj repo i skonfiguruj `.env`** jak w sekcji wyżej. Dodatkowo ustaw:
+   ```
+   DJANGO_ALLOWED_HOSTS=kalkulator.twojadomena.pl
+   DJANGO_CSRF_TRUSTED_ORIGINS=https://kalkulator.twojadomena.pl
+   ```
+2. **Zbuduj i uruchom stos** (bez publicznego portu — `web` nasłuchuje tylko na `127.0.0.1`):
+   ```bash
+   docker compose up -d --build
+   curl -I http://127.0.0.1:8010/   # powinno zwrócić 200 OK
+   ```
+3. **Podłącz istniejący kontener Caddy do sieci kalkulatora**, żeby mógł
+   rozwiązać nazwę `kalkulator-web` przez DNS Dockera (nie trzeba restartować
+   Caddy — dołączenie do sieci działa "na żywo"):
+   ```bash
+   docker network connect kalkulator_default <nazwa_kontenera_caddy>
+   # np.: docker network connect kalkulator_default multiplekser-caddy-1
+   ```
+4. **Dopisz nowy blok domeny do `Caddyfile`** używanego przez ten kontener
+   (znajdziesz ścieżkę przez `docker inspect <kontener_caddy> --format '{{json .Mounts}}'`),
+   **nie usuwając** istniejących wpisów dla innych aplikacji:
+   ```caddyfile
+   kalkulator.twojadomena.pl {
+       reverse_proxy kalkulator-web:8000
+   }
+   ```
+5. **Przeładuj konfigurację Caddy bez przerywania innych stron**:
+   ```bash
+   docker exec <nazwa_kontenera_caddy> caddy reload --config /etc/caddy/Caddyfile --adapter caddyfile
+   ```
+6. **Ustaw rekord DNS A** dla `kalkulator.twojadomena.pl` na publiczne IP VPS
+   (jeśli jeszcze nie istnieje). Caddy automatycznie wystawi certyfikat Let's
+   Encrypt przy pierwszym żądaniu HTTPS.
+7. **Test end-to-end**: `https://kalkulator.twojadomena.pl/` (kalkulator
+   publiczny) i `https://kalkulator.twojadomena.pl/admin-panel/login/`
+   (panel administratora).
+
+Ustawienie `SECURE_PROXY_SSL_HEADER` w `config/settings.py` jest już
+skonfigurowane pod ten scenariusz — Django prawidłowo rozpozna żądania jako
+bezpieczne (https) na podstawie nagłówka `X-Forwarded-Proto` przekazywanego
+przez Caddy, zamiast wpaść w pętlę przekierowań.
+
 ## Aktualizacja bez utraty danych
 
 ```bash

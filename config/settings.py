@@ -122,6 +122,14 @@ CACHES = {
     }
 }
 
+# --- Reverse proxy (Caddy/Nginx) terminujący TLS przed aplikacją ---
+# Aplikacja stoi za reverse proxy, który sam obsługuje HTTPS i przekazuje ruch
+# dalej po zwykłym HTTP wewnątrz sieci Docker. Bez tego SECURE_SSL_REDIRECT
+# wpadłby w nieskończoną pętlę przekierowań, bo Django widziałoby każde
+# żądanie jako "niebezpieczne" (http), nawet gdy klient łączył się po https.
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+USE_X_FORWARDED_HOST = True
+
 # --- Bezpieczeństwo produkcyjne (włączane automatycznie gdy DEBUG=False) ---
 if not DEBUG:
     SECURE_SSL_REDIRECT = env.bool("DJANGO_SECURE_SSL_REDIRECT", default=True)
