@@ -51,7 +51,7 @@ Przy pierwszym starcie kontener `web` automatycznie:
 Jeśli nie ustawiłeś tych zmiennych, utwórz konto administratora ręcznie:
 
 ```bash
-docker compose exec web python manage.py createsuperuser
+docker compose exec app python manage.py createsuperuser
 ```
 
 ## Uruchomienie lokalne (bez Dockera, do developmentu)
@@ -89,7 +89,7 @@ python manage.py runserver 0.0.0.0:8010
 python -m pytest
 
 # w kontenerze
-docker compose exec web python -m pytest
+docker compose exec app python -m pytest
 ```
 
 Zestaw testów (75 testów) obejmuje m.in.: normalizację wartości (`{pusty}`,
@@ -150,12 +150,25 @@ skonfigurowane pod ten scenariusz — Django prawidłowo rozpozna żądania jako
 bezpieczne (https) na podstawie nagłówka `X-Forwarded-Proto` przekazywanego
 przez Caddy, zamiast wpaść w pętlę przekierowań.
 
+> **Uwaga na kolizje nazw usług.** Gdy współdzielony kontener Caddy zostanie
+> podłączony do kilku sieci Docker jednocześnie (np. sieci innej aplikacji
+> i sieci `kalkulator_default`), rozwiązywanie DNS krótkiej nazwy usługi
+> (nie `container_name`, tylko klucz usługi z `docker-compose.yml`, np. `web`)
+> staje się niejednoznaczne, jeśli dwie różne aplikacje mają usługę o tej
+> samej nazwie — Caddy może trafić do złego kontenera. Dlatego usługa
+> aplikacji nazywa się tu `app` (nie `web`), a `reverse_proxy` w Caddyfile
+> powinien zawsze celować w unikalny `container_name` (`kalkulator-web`),
+> nigdy w gołą nazwę usługi. Jeśli na tym samym VPS stoją inne stosy Compose
+> podłączane do wspólnego Caddy, sprawdź, czy żadna z ich usług nie nazywa
+> się tak samo jak Twoje (`app`, `db`) — w razie kolizji zmień nazwę usługi
+> w `docker-compose.yml` na coś unikalnego dla tego serwera.
+
 ## Aktualizacja bez utraty danych
 
 ```bash
 git pull
-docker compose build web
-docker compose up -d web
+docker compose build app
+docker compose up -d app
 # entrypoint kontenera automatycznie wykona nowe migracje przy starcie
 ```
 
