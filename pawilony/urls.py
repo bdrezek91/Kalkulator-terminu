@@ -7,6 +7,7 @@ app_name = "pawilony"
 
 urlpatterns = [
     path("", views.CalculatorView.as_view(), name="calculator"),
+    path("obciazenie/", views.BacklogSummaryView.as_view(), name="backlog_summary"),
     path("admin-panel/login/", auth_views.LoginView.as_view(template_name="pawilony/admin/login.html"), name="login"),
     path("admin-panel/logout/", auth_views.LogoutView.as_view(next_page="pawilony:calculator"), name="logout"),
     path("admin-panel/", views.DashboardView.as_view(), name="dashboard"),

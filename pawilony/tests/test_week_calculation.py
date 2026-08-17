@@ -28,12 +28,15 @@ def test_next_planning_monday_from_midweek_is_next_monday():
     assert result == date(2026, 8, 24)
 
 
-def test_base_capacity_bottleneck(active_config):
-    backlog = BacklogTotals(base_units=0, hydraulic_hours=Decimal("0"), welding_hours=Decimal("0"), fibo_wood_hours=Decimal("0"))
+def test_no_finishing_brigade_required_gives_week_one_and_no_bottleneck(active_config):
+    # Produkcja ogólna NIE ogranicza terminu (informacyjna) — bez wyposażenia
+    # wykończeniowego pawilon jest dostępny od razu, w najbliższym tygodniu.
+    backlog = BacklogTotals(base_units=1000, hydraulic_hours=Decimal("0"), welding_hours=Decimal("0"), fibo_wood_hours=Decimal("0"))
     new_pavilion = HoursResult()  # brak wyposażenia specjalistycznego
     result = calculate_earliest_week(backlog, new_pavilion, active_config, today=date(2026, 8, 17))
     assert result.result_weeks == 1
-    assert result.bottleneck_key == "base"
+    assert result.bottleneck_key is None
+    assert result.base_outcome.weeks > 1  # informacyjnie duży backlog, ale nie wpływa na wynik
 
 
 def test_fibo_wood_bottleneck(active_config):
@@ -73,7 +76,8 @@ def test_iso_week_year_boundary(active_config):
 
 
 def test_result_is_max_across_all_required_brigades(active_config):
-    # Baza wymaga 1 tygodnia, hydraulicy 2, spawacze 3, FIBO/boazeria 1 -> wynik = 3 (spawacze).
+    # Wynik to maksimum tylko po brygadach wykończeniowych — spawacze wymagają
+    # najwięcej tygodni, więc to oni są wąskim gardłem, niezależnie od produkcji ogólnej.
     backlog = BacklogTotals(
         base_units=0,
         hydraulic_hours=Decimal("0"),

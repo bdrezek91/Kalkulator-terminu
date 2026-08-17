@@ -1,6 +1,11 @@
 """
 Algorytm wyznaczania najwcześniejszego bezpiecznego tygodnia realizacji.
 
+Ograniczeniem terminu jest wyłącznie obciążenie brygad wykończeniowych
+(hydraulika, spawacze, FIBO/boazeria) — moc samej produkcji pawilonów
+("produkcja ogólna") jest pokazywana wyłącznie informacyjnie i NIE wpływa
+na wynik, bo firma ma jej pod dostatkiem; wąskim gardłem jest wyposażenie.
+
 Obliczenia pojemności wykonywane są na typie Decimal (nigdy float), a
 zaokrąglenie w górę następuje dopiero na etapie liczby wymaganych tygodni.
 """
@@ -12,8 +17,8 @@ from decimal import ROUND_CEILING, Decimal
 from pawilony.models import CapacityConfiguration
 from pawilony.services.hours import HoursResult
 
+BASE_LABEL = "Produkcja ogólna"
 BRIGADE_LABELS = {
-    "base": "Produkcja ogólna",
     "hydraulic": "Hydraulicy",
     "welding": "Spawacze",
     "fibo_wood": "FIBO/boazeria",
@@ -44,8 +49,9 @@ class WeekResult:
     iso_year: int
     week_start: date
     week_end: date
-    bottleneck_key: str
+    bottleneck_key: str | None  # None = żadna brygada wykończeniowa nie jest wymagana
     brigade_outcomes: list[BrigadeOutcome] = field(default_factory=list)
+    base_outcome: BrigadeOutcome | None = None  # informacyjnie, nie wpływa na wynik
 
 
 def _ceil_decimal_to_int(value: Decimal) -> int:
@@ -76,16 +82,13 @@ def calculate_earliest_week(
     base_weeks = _ceil_decimal_to_int(
         (Decimal(backlog.base_units + 1)) / config.effective_general_capacity
     )
-
-    outcomes: list[BrigadeOutcome] = [
-        BrigadeOutcome(
-            key="base",
-            weeks=base_weeks,
-            current_backlog=Decimal(backlog.base_units),
-            effective_capacity=config.effective_general_capacity,
-            required=True,
-        )
-    ]
+    base_outcome = BrigadeOutcome(
+        key="base",
+        weeks=base_weeks,
+        current_backlog=Decimal(backlog.base_units),
+        effective_capacity=config.effective_general_capacity,
+        required=True,
+    )
 
     def brigade_weeks(key: str, backlog_hours: Decimal, new_hours: Decimal, capacity: Decimal) -> BrigadeOutcome:
         required = new_hours > 0
@@ -101,33 +104,32 @@ def calculate_earliest_week(
             required=required,
         )
 
-    outcomes.append(
+    outcomes: list[BrigadeOutcome] = [
         brigade_weeks(
             "hydraulic",
             backlog.hydraulic_hours,
             new_pavilion_hours.hydraulic_hours,
             config.effective_hydraulic_capacity_hours,
-        )
-    )
-    outcomes.append(
+        ),
         brigade_weeks(
             "welding",
             backlog.welding_hours,
             new_pavilion_hours.welding_hours,
             config.effective_welding_capacity_hours,
-        )
-    )
-    outcomes.append(
+        ),
         brigade_weeks(
             "fibo_wood",
             backlog.fibo_wood_hours,
             new_pavilion_hours.fibo_wood_hours,
             config.effective_fibo_wood_capacity_hours,
-        )
-    )
+        ),
+    ]
 
+    # Wynik zależy WYŁĄCZNIE od brygad wykończeniowych — produkcja ogólna
+    # (base_outcome) jest tylko informacyjna i celowo pomijana tutaj.
     result_weeks = max(1, *(o.weeks for o in outcomes))
-    bottleneck = max(outcomes, key=lambda o: o.weeks).key
+    required_outcomes = [o for o in outcomes if o.required]
+    bottleneck = max(required_outcomes, key=lambda o: o.weeks).key if required_outcomes else None
 
     target_monday = start_monday + timedelta(weeks=result_weeks - 1)
     target_friday = target_monday + timedelta(days=4)
@@ -141,4 +143,5 @@ def calculate_earliest_week(
         week_end=target_friday,
         bottleneck_key=bottleneck,
         brigade_outcomes=outcomes,
+        base_outcome=base_outcome,
     )

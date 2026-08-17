@@ -13,6 +13,7 @@ from pawilony.forms import CalculatorForm, ImportUploadForm
 from pawilony.models import CapacityConfiguration, ImportBatch, ManualBacklogAdjustment
 from pawilony.services.capacity import (
     compute_backlog_totals,
+    compute_equipment_breakdown,
     fibo_wood_columns_present,
     get_active_configuration,
     get_active_import_batch,
@@ -26,7 +27,7 @@ from pawilony.services.import_service import (
     commit_batch,
     report_to_dict,
 )
-from pawilony.services.week_calculation import BRIGADE_LABELS, calculate_earliest_week
+from pawilony.services.week_calculation import BASE_LABEL, BRIGADE_LABELS, calculate_earliest_week
 
 logger = logging.getLogger("pawilony.audit")
 
@@ -117,12 +118,28 @@ class CalculatorView(View):
                 }
             )
 
+        base_row = None
+        if week_result.base_outcome:
+            base_row = {
+                "label": BASE_LABEL,
+                "weeks": week_result.base_outcome.weeks,
+                "current_backlog": week_result.base_outcome.current_backlog,
+                "effective_capacity": week_result.base_outcome.effective_capacity,
+            }
+
+        bottleneck_label = (
+            BRIGADE_LABELS[week_result.bottleneck_key]
+            if week_result.bottleneck_key
+            else "Brak — pawilon nie wymaga prac żadnej brygady wykończeniowej"
+        )
+
         context.update(
             {
                 "result": week_result,
                 "brigade_rows": brigade_rows,
+                "base_row": base_row,
                 "hours_result": hours_result,
-                "bottleneck_label": BRIGADE_LABELS[week_result.bottleneck_key],
+                "bottleneck_label": bottleneck_label,
                 "no_active_import": active_batch is None,
                 "last_import_at": last_import_at,
                 "data_is_stale": data_is_stale,
@@ -130,6 +147,50 @@ class CalculatorView(View):
                 "fibo_wood_may_be_understated": fibo_wood_may_be_understated,
             }
         )
+        return render(request, self.template_name, context)
+
+
+class BacklogSummaryView(View):
+    """
+    Publiczne, zagregowane podsumowanie obecnego obciążenia kolejki —
+    wyjaśnia, z czego wynika wyznaczany termin. Pokazuje wyłącznie liczby
+    wg typu wyposażenia, nigdy kodów/nazw/numerów projektów pawilonów.
+    """
+
+    template_name = "pawilony/backlog_summary.html"
+
+    def get(self, request):
+        active_batch = get_active_import_batch()
+        backlog = compute_backlog_totals(active_batch)
+        breakdown = compute_equipment_breakdown(active_batch)
+        manual_totals = manual_adjustment_totals()
+        fibo_present, boazeria_present = fibo_wood_columns_present(active_batch)
+
+        try:
+            config = get_active_configuration()
+            stale_threshold_hours = config.stale_data_warning_hours
+        except NoActiveConfigurationError:
+            stale_threshold_hours = None
+
+        last_import_at = None
+        data_is_stale = True
+        if active_batch and active_batch.committed_at:
+            last_import_at = active_batch.committed_at
+            if stale_threshold_hours is not None:
+                age = timezone.now() - active_batch.committed_at
+                data_is_stale = age.total_seconds() > stale_threshold_hours * 3600
+
+        context = {
+            "backlog": backlog,
+            "breakdown": breakdown,
+            "manual_totals": manual_totals,
+            "no_active_import": active_batch is None,
+            "last_import_at": last_import_at,
+            "data_is_stale": data_is_stale,
+            "stale_threshold_hours": stale_threshold_hours,
+            "fibo_wood_may_be_understated": not (fibo_present and boazeria_present)
+            and manual_totals["FIBO_WOOD"] == 0,
+        }
         return render(request, self.template_name, context)
 
 
