@@ -53,8 +53,15 @@ def test_reference_file_row_and_active_counts(operation_times):
     # to dawałoby 433. Po dodaniu reguły wykluczającej pełną konstrukcję i
     # kratownicę (tylko dla aktywnych statusów) 3 z tych nowych konfliktów
     # pokrywały się z wcześniej liczonymi wierszami, więc wynik to 433 - 3 = 430.
+    #
+    # Po dodaniu reguły "Od ręki nie liczy się do kolejki, dopóki nie ma statusu
+    # Produkcja Zabrze/Czekanów" (sierpień 2026) 79 wcześniej liczonych wierszy
+    # zostaje wykluczonych. Zmienia to też, który wiersz jako pierwszy "zajmuje"
+    # dany kod w wykrywaniu duplikatów aktywnego kodu, stąd spadek jest o 77
+    # (430 - 79 + 2), nie dokładnie 79 — zweryfikowano empirycznie na tym pliku.
+    assert report.od_reki_excluded_count == 79
     counted = [r for r in records if r["is_counted"]]
-    assert len(counted) == 430
+    assert len(counted) == 353
 
     # plik źródłowy nie zawiera jeszcze kolumn FIBO/BOAZERIA
     assert report.fibo_column_present is False

@@ -101,6 +101,37 @@ def test_modules_2_plus_skipped(operation_times):
     assert report.module_skipped_count == 1
 
 
+def test_od_reki_excluded_when_status_logistyka(operation_times):
+    rows = [_make_row(kod="X1", rodzaj="Od ręki", status="Logistyka")]
+    report, records = analyze_workbook(_build_workbook(rows))
+    assert records[0]["is_counted"] is False
+    assert records[0]["od_reki_excluded"] is True
+    assert report.od_reki_excluded_count == 1
+
+
+@pytest.mark.parametrize("status", ["Produkcja Zabrze", "Produkcja Czekanów"])
+def test_od_reki_counted_when_in_production(operation_times, status):
+    rows = [_make_row(kod="X1", rodzaj="Od ręki", status=status)]
+    report, records = analyze_workbook(_build_workbook(rows))
+    assert records[0]["is_counted"] is True
+    assert records[0]["od_reki_excluded"] is False
+    assert report.od_reki_excluded_count == 0
+
+
+def test_zamowiony_counted_when_status_logistyka(operation_times):
+    rows = [_make_row(kod="X1", rodzaj="Zamówiony", status="Logistyka")]
+    report, records = analyze_workbook(_build_workbook(rows))
+    assert records[0]["is_counted"] is True
+    assert records[0]["od_reki_excluded"] is False
+
+
+def test_od_reki_ambiguous_rodzaj_still_excluded_in_logistyka(operation_times):
+    rows = [_make_row(kod="X1", rodzaj="Od ręki\nZamówiony", status="Logistyka")]
+    report, records = analyze_workbook(_build_workbook(rows))
+    assert records[0]["is_counted"] is False
+    assert records[0]["od_reki_excluded"] is True
+
+
 def test_statyka_hours_multiplied_by_total_project_modules(operation_times):
     rows = [
         _make_row(kod="X1", nazwa="Pawilon 10x3 nr projektu 1/1/2024 (MODUŁ 1)",

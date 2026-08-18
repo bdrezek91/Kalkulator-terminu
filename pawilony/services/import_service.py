@@ -27,6 +27,20 @@ logger = logging.getLogger("pawilony.audit")
 
 SHEET_NAME = "Lista zasobów"
 
+OD_REKI_LABEL = "od ręki"
+OD_REKI_ALLOWED_STATUSES = {"Produkcja Zabrze", "Produkcja Czekanów"}
+
+
+def _is_od_reki(rodzaj_norm) -> bool:
+    """
+    'Rodzaj' == 'Od ręki' — dotyczy pojedynczej wartości oraz komórek
+    wieloznacznych (np. 'Od ręki\\nZamówiony'), żeby nie zaniżać ograniczenia
+    przez niejednoznaczność danych źródłowych.
+    """
+    if rodzaj_norm.is_ambiguous:
+        return any(v.strip().lower() == OD_REKI_LABEL for v in rodzaj_norm.distinct_values)
+    return (rodzaj_norm.value or "").strip().lower() == OD_REKI_LABEL
+
 
 class ImportAnalysisError(Exception):
     """Błąd blokujący dalsze przetwarzanie pliku (np. brak arkusza lub kolumn)."""
@@ -40,6 +54,7 @@ class ImportReport:
     unrecognized_status_count: int = 0
     empty_status_count: int = 0
     module_skipped_count: int = 0
+    od_reki_excluded_count: int = 0
     conflict_count: int = 0
     duplicate_count: int = 0
     unrecognized_values: list[dict] = field(default_factory=list)
@@ -230,7 +245,22 @@ def analyze_workbook(file_obj) -> tuple[ImportReport, list[dict]]:
         module_ok = is_counted_module(module_result)
         has_conflict = bool(conflict_reasons)
 
-        is_counted = is_active_status and module_ok and not has_conflict
+        # Pawilony "Od ręki" nie wchodzą do kolejki, dopóki nie mają statusu
+        # Produkcja Zabrze albo Produkcja Czekanów — samo "Logistyka" (mimo że
+        # jest statusem aktywnym dla pawilonów "Zamówiony") ich jeszcze nie liczy.
+        od_reki_excluded = (
+            is_active_status
+            and _is_od_reki(rodzaj_norm)
+            and status_result.canonical not in OD_REKI_ALLOWED_STATUSES
+        )
+        if od_reki_excluded:
+            warnings.append(
+                "Rodzaj 'Od ręki': pominięto w kolejce do czasu statusu "
+                "Produkcja Zabrze/Produkcja Czekanów."
+            )
+            report.od_reki_excluded_count += 1
+
+        is_counted = is_active_status and module_ok and not has_conflict and not od_reki_excluded
 
         if is_counted:
             key = kod.lower()
@@ -337,6 +367,7 @@ def analyze_workbook(file_obj) -> tuple[ImportReport, list[dict]]:
                 "plyty_niestandard_raw": str(raw_values.get("plyty_niestandard") or ""),
                 "inne_niestandard_raw": str(raw_values.get("inne_niestandard") or ""),
                 "attributes_raw": {k: ("" if v is None else str(v)) for k, v in raw_values.items()},
+                "od_reki_excluded": od_reki_excluded,
                 "is_counted": is_counted,
                 "is_custom": is_custom,
                 "hydraulic_hours": str(record_hydraulic),

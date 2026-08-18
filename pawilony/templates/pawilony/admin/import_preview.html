@@ -40,6 +40,12 @@
     </div></div></div>
 </div>
 
+<div class="row mb-4">
+    <div class="col-md-3"><div class="card"><div class="card-body">
+        <div class="text-muted small">Pominięte "Od ręki" (bez Produkcja Zabrze/Czekanów)</div><div class="h5">{{ report.od_reki_excluded_count }}</div>
+    </div></div></div>
+</div>
+
 {% if report.missing_columns %}
 <div class="alert alert-danger">Brak wymaganych kolumn: {{ report.missing_columns|join:", " }}</div>
 {% endif %}
