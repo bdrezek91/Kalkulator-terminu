@@ -95,7 +95,7 @@
 
                 <table class="table table-sm mt-3">
                     <thead>
-                        <tr><th>Brygada wykończeniowa</th><th>Wymagany tydzień</th></tr>
+                        <tr><th>Brygada</th><th>Wymagany tydzień</th></tr>
                     </thead>
                     <tbody>
                         {% for row in brigade_rows %}
@@ -113,12 +113,6 @@
                         {% endfor %}
                     </tbody>
                 </table>
-                {% if base_row %}
-                <p class="small text-muted mb-3">
-                    Produkcja ogólna (informacyjnie, nie ogranicza terminu — moc na to jest):
-                    tydzień {{ base_row.weeks }}.
-                </p>
-                {% endif %}
 
                 <h3 class="h6 mt-4">Godziny nowego pawilonu wg brygad</h3>
                 <ul>

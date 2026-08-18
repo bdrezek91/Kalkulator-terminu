@@ -51,6 +51,23 @@
     </div>
 </div>
 
+{% if config %}
+<div class="card mb-4">
+    <div class="card-body">
+        <h2 class="h6">Produkcja ogólna</h2>
+        <p class="small text-muted mb-1">
+            Kolejka zamówień ogranicza termin nawet dla pawilonu bez żadnego wyposażenia
+            specjalistycznego — sama budowa też stoi w kolejce za innymi zamówieniami.
+        </p>
+        <p class="mb-0">
+            <strong>{{ breakdown.total_counted }}</strong> pawilonów w kolejce,
+            moc <strong>{{ config.effective_general_capacity }}</strong> pawilonu/tydzień
+            (po buforze {{ config.safety_buffer_percent }}%).
+        </p>
+    </div>
+</div>
+{% endif %}
+
 <div class="row">
     <div class="col-lg-6">
         <div class="card mb-4">
@@ -137,7 +154,7 @@
 </div>
 
 <p class="small text-muted">
-    Produkcja ogólna pawilonów nie jest tu ograniczeniem — moc na wyprodukowanie pawilonów jest wystarczająca.
-    Termin dla nowego pawilonu wynika wyłącznie z obciążenia brygad wykończeniowych pokazanych powyżej.
+    Termin dla nowego pawilonu to maksimum wymaganych tygodni po produkcji ogólnej
+    oraz wszystkich brygadach wykończeniowych pokazanych powyżej.
 </p>
 {% endblock %}

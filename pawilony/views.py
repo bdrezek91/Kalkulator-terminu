@@ -27,7 +27,7 @@ from pawilony.services.import_service import (
     commit_batch,
     report_to_dict,
 )
-from pawilony.services.week_calculation import BASE_LABEL, BRIGADE_LABELS, calculate_earliest_week
+from pawilony.services.week_calculation import BRIGADE_LABELS, calculate_earliest_week
 
 logger = logging.getLogger("pawilony.audit")
 
@@ -119,26 +119,12 @@ class CalculatorView(View):
                 }
             )
 
-        base_row = None
-        if week_result.base_outcome:
-            base_row = {
-                "label": BASE_LABEL,
-                "weeks": week_result.base_outcome.weeks,
-                "current_backlog": week_result.base_outcome.current_backlog,
-                "effective_capacity": week_result.base_outcome.effective_capacity,
-            }
-
-        bottleneck_label = (
-            BRIGADE_LABELS[week_result.bottleneck_key]
-            if week_result.bottleneck_key
-            else "Brak — pawilon nie wymaga prac żadnej brygady wykończeniowej"
-        )
+        bottleneck_label = BRIGADE_LABELS[week_result.bottleneck_key]
 
         context.update(
             {
                 "result": week_result,
                 "brigade_rows": brigade_rows,
-                "base_row": base_row,
                 "hours_result": hours_result,
                 "bottleneck_label": bottleneck_label,
                 "no_active_import": active_batch is None,
@@ -171,6 +157,7 @@ class BacklogSummaryView(View):
             config = get_active_configuration()
             stale_threshold_hours = config.stale_data_warning_hours
         except NoActiveConfigurationError:
+            config = None
             stale_threshold_hours = None
 
         last_import_at = None
@@ -185,6 +172,7 @@ class BacklogSummaryView(View):
             "backlog": backlog,
             "breakdown": breakdown,
             "manual_totals": manual_totals,
+            "config": config,
             "no_active_import": active_batch is None,
             "last_import_at": last_import_at,
             "data_is_stale": data_is_stale,
