@@ -14,14 +14,20 @@ WORK_CENTERS = [
 
 # code, name, work_center, hours, affects_term
 OPERATION_TIMES = [
-    ("kuchnia_standard", "Kuchnia Standard", WorkCenter.Code.HYDRAULIC, "8", True),
+    # Wartości hydrauliki potwierdzone z produkcją (korespondencja Dampol/DIT, sierpień 2026):
+    # Kuchnia: jedna stawka niezależnie od wariantu; Toaleta/Łazienka wg tabeli Standard/Komfort/Premium.
+    ("kuchnia_standard", "Kuchnia Standard", WorkCenter.Code.HYDRAULIC, "10", True),
     ("kuchnia_lux", "Kuchnia Lux", WorkCenter.Code.HYDRAULIC, "10", True),
-    ("toaleta_standard", "Toaleta Standard", WorkCenter.Code.HYDRAULIC, "6", True),
-    ("toaleta_komfort", "Toaleta Komfort", WorkCenter.Code.HYDRAULIC, "7", True),
-    ("toaleta_premium", "Toaleta Premium", WorkCenter.Code.HYDRAULIC, "8", True),
-    ("lazienka_standard", "Łazienka Standard", WorkCenter.Code.HYDRAULIC, "10", True),
-    ("lazienka_komfort", "Łazienka Komfort", WorkCenter.Code.HYDRAULIC, "11", True),
-    ("lazienka_premium", "Łazienka Premium", WorkCenter.Code.HYDRAULIC, "12", True),
+    ("toaleta_standard", "Toaleta Standard", WorkCenter.Code.HYDRAULIC, "7", True),
+    ("toaleta_komfort", "Toaleta Komfort", WorkCenter.Code.HYDRAULIC, "12", True),
+    ("toaleta_premium", "Toaleta Premium", WorkCenter.Code.HYDRAULIC, "10", True),
+    # Niestandardowe warianty WC potwierdzone z produkcją (korespondencja Dampol/DIT, sierpień 2026).
+    ("toaleta_fibo", "WC Fibo", WorkCenter.Code.HYDRAULIC, "80", True),
+    ("toaleta_premium_plytki", "WC Premium płytki", WorkCenter.Code.HYDRAULIC, "100", True),
+    ("toaleta_premium_boazeria", "WC Premium + boazeria", WorkCenter.Code.HYDRAULIC, "150", True),
+    ("lazienka_standard", "Łazienka Standard", WorkCenter.Code.HYDRAULIC, "7", True),
+    ("lazienka_komfort", "Łazienka Komfort", WorkCenter.Code.HYDRAULIC, "10", True),
+    ("lazienka_premium", "Łazienka Premium", WorkCenter.Code.HYDRAULIC, "10", True),
     ("prysznic_samodzielny", "Samodzielny prysznic", WorkCenter.Code.HYDRAULIC, "8", True),
     ("statyka_pelna", "Pełna konstrukcja / statyka", WorkCenter.Code.WELDING, "12", True),
     ("kratownica", "Kratownica", WorkCenter.Code.WELDING, "4", True),

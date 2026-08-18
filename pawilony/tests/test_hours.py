@@ -5,7 +5,7 @@ from pawilony.services.hours import PavilionEquipment, calculate_hours
 
 def test_kuchnia_standard(operation_times):
     result = calculate_hours(PavilionEquipment(kuchnia="Standard"))
-    assert result.hydraulic_hours == Decimal("8")
+    assert result.hydraulic_hours == Decimal("10")
 
 
 def test_kuchnia_lux(operation_times):
@@ -14,20 +14,26 @@ def test_kuchnia_lux(operation_times):
 
 
 def test_toaleta_variants(operation_times):
-    assert calculate_hours(PavilionEquipment(toaleta="Standard")).hydraulic_hours == Decimal("6")
-    assert calculate_hours(PavilionEquipment(toaleta="Komfort")).hydraulic_hours == Decimal("7")
-    assert calculate_hours(PavilionEquipment(toaleta="Premium")).hydraulic_hours == Decimal("8")
+    assert calculate_hours(PavilionEquipment(toaleta="Standard")).hydraulic_hours == Decimal("7")
+    assert calculate_hours(PavilionEquipment(toaleta="Komfort")).hydraulic_hours == Decimal("12")
+    assert calculate_hours(PavilionEquipment(toaleta="Premium")).hydraulic_hours == Decimal("10")
+
+
+def test_toaleta_custom_wc_variants(operation_times):
+    assert calculate_hours(PavilionEquipment(toaleta="Fibo")).hydraulic_hours == Decimal("80")
+    assert calculate_hours(PavilionEquipment(toaleta="Premium płytki")).hydraulic_hours == Decimal("100")
+    assert calculate_hours(PavilionEquipment(toaleta="Premium + boazeria")).hydraulic_hours == Decimal("150")
 
 
 def test_lazienka_replaces_toaleta_and_prysznic(operation_times):
     result = calculate_hours(PavilionEquipment(lazienka="Standard", toaleta="Premium", prysznic=True))
-    # tylko łazienka się liczy — 10h, nie 10+8+8
-    assert result.hydraulic_hours == Decimal("10")
+    # tylko łazienka się liczy — 7h, nie 7+10+8
+    assert result.hydraulic_hours == Decimal("7")
 
 
 def test_kuchnia_sums_with_lazienka(operation_times):
     result = calculate_hours(PavilionEquipment(kuchnia="Lux", lazienka="Premium"))
-    assert result.hydraulic_hours == Decimal("10") + Decimal("12")
+    assert result.hydraulic_hours == Decimal("10") + Decimal("10")
 
 
 def test_statyka_sums_with_kratownica(operation_times):

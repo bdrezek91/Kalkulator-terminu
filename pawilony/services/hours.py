@@ -16,6 +16,10 @@ HYDRAULIC_CODES = {
     ("toaleta", "standard"): "toaleta_standard",
     ("toaleta", "komfort"): "toaleta_komfort",
     ("toaleta", "premium"): "toaleta_premium",
+    # Niestandardowe warianty WC potwierdzone z produkcją (sierpień 2026).
+    ("toaleta", "fibo"): "toaleta_fibo",
+    ("toaleta", "premium płytki"): "toaleta_premium_plytki",
+    ("toaleta", "premium + boazeria"): "toaleta_premium_boazeria",
     ("lazienka", "standard"): "lazienka_standard",
     ("lazienka", "komfort"): "lazienka_komfort",
     ("lazienka", "premium"): "lazienka_premium",

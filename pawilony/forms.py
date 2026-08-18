@@ -4,6 +4,12 @@ from django.core.exceptions import ValidationError
 
 KUCHNIA_CHOICES = [("", "brak"), ("Standard", "Standard"), ("Lux", "Lux")]
 WARIANT_CHOICES = [("", "brak"), ("Standard", "Standard"), ("Komfort", "Komfort"), ("Premium", "Premium")]
+# Toaleta ma dodatkowo niestandardowe warianty WC potwierdzone z produkcją (sierpień 2026).
+TOALETA_CHOICES = WARIANT_CHOICES + [
+    ("Fibo", "WC Fibo"),
+    ("Premium płytki", "WC Premium płytki"),
+    ("Premium + boazeria", "WC Premium + boazeria"),
+]
 
 
 class CalculatorForm(forms.Form):
@@ -12,7 +18,7 @@ class CalculatorForm(forms.Form):
         widget=forms.Select(attrs={"class": "form-select"}),
     )
     toaleta = forms.ChoiceField(
-        choices=WARIANT_CHOICES, required=False, label="Toaleta",
+        choices=TOALETA_CHOICES, required=False, label="Toaleta",
         widget=forms.Select(attrs={"class": "form-select", "id": "id_toaleta"}),
     )
     lazienka = forms.ChoiceField(

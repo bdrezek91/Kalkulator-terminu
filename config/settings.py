@@ -91,7 +91,14 @@ STORAGES = {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
     },
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        # Manifest (hashed nazw plików) storage jest optymalizacją produkcyjną i wymaga
+        # wcześniejszego `collectstatic` — w trybie DEBUG (lokalnie, w testach) serwujemy
+        # pliki wprost ze źródła, bez tego wymogu.
+        "BACKEND": (
+            "whitenoise.storage.CompressedManifestStaticFilesStorage"
+            if not DEBUG
+            else "django.contrib.staticfiles.storage.StaticFilesStorage"
+        ),
     },
 }
 

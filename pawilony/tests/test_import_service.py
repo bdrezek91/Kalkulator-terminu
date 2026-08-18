@@ -114,7 +114,7 @@ def test_kuchnia_standard_and_lux(operation_times):
     ]
     _, records = analyze_workbook(_build_workbook(rows))
     by_kod = {r["kod"]: r for r in records}
-    assert Decimal(by_kod["X1"]["hydraulic_hours"]) == Decimal("8")
+    assert Decimal(by_kod["X1"]["hydraulic_hours"]) == Decimal("10")
     assert Decimal(by_kod["X2"]["hydraulic_hours"]) == Decimal("10")
 
 
@@ -126,21 +126,35 @@ def test_toaleta_variants(operation_times):
     ]
     _, records = analyze_workbook(_build_workbook(rows))
     by_kod = {r["kod"]: r for r in records}
-    assert Decimal(by_kod["X1"]["hydraulic_hours"]) == Decimal("6")
-    assert Decimal(by_kod["X2"]["hydraulic_hours"]) == Decimal("7")
-    assert Decimal(by_kod["X3"]["hydraulic_hours"]) == Decimal("8")
+    assert Decimal(by_kod["X1"]["hydraulic_hours"]) == Decimal("7")
+    assert Decimal(by_kod["X2"]["hydraulic_hours"]) == Decimal("12")
+    assert Decimal(by_kod["X3"]["hydraulic_hours"]) == Decimal("10")
+
+
+def test_toaleta_custom_wc_variants_recognized(operation_times):
+    rows = [
+        _make_row(kod="X1", status="Logistyka", toaleta="Fibo"),
+        _make_row(kod="X2", status="Logistyka", toaleta="Premium płytki"),
+        _make_row(kod="X3", status="Logistyka", toaleta="Premium + boazeria"),
+    ]
+    report, records = analyze_workbook(_build_workbook(rows))
+    by_kod = {r["kod"]: r for r in records}
+    assert Decimal(by_kod["X1"]["hydraulic_hours"]) == Decimal("80")
+    assert Decimal(by_kod["X2"]["hydraulic_hours"]) == Decimal("100")
+    assert Decimal(by_kod["X3"]["hydraulic_hours"]) == Decimal("150")
+    assert report.unrecognized_values == []
 
 
 def test_lazienka_replaces_toaleta_and_prysznic(operation_times):
     rows = [_make_row(kod="X1", status="Logistyka", lazienka="Standard", toaleta="Premium", prysznic="Tak")]
     _, records = analyze_workbook(_build_workbook(rows))
-    assert Decimal(records[0]["hydraulic_hours"]) == Decimal("10")
+    assert Decimal(records[0]["hydraulic_hours"]) == Decimal("7")
 
 
 def test_kuchnia_sums_with_lazienka(operation_times):
     rows = [_make_row(kod="X1", status="Logistyka", kuchnia="Lux", lazienka="Premium")]
     _, records = analyze_workbook(_build_workbook(rows))
-    assert Decimal(records[0]["hydraulic_hours"]) == Decimal("10") + Decimal("12")
+    assert Decimal(records[0]["hydraulic_hours"]) == Decimal("10") + Decimal("10")
 
 
 def test_statyka_sums_with_kratownica(operation_times):
