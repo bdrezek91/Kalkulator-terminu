@@ -24,6 +24,17 @@ def test_calculator_computes_result(client, operation_times, active_config):
     assert "Wynik" in response.content.decode() or "wynik" in response.content.decode().lower()
 
 
+def test_calculator_rejects_statyka_and_kratownica_together(client, operation_times, active_config):
+    response = client.post(
+        reverse("pawilony:calculator"),
+        {"pelna_statyka": "on", "kratownica": "on"},
+    )
+    assert response.status_code == 200
+    body = response.content.decode()
+    assert "wyklucz" in body.lower()
+    assert "Wynik" not in body
+
+
 def test_admin_panel_requires_login(client):
     response = client.get(reverse("pawilony:dashboard"))
     assert response.status_code == 302

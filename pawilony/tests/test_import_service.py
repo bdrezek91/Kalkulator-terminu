@@ -139,9 +139,10 @@ def test_toaleta_custom_wc_variants_recognized(operation_times):
     ]
     report, records = analyze_workbook(_build_workbook(rows))
     by_kod = {r["kod"]: r for r in records}
-    assert Decimal(by_kod["X1"]["hydraulic_hours"]) == Decimal("80")
-    assert Decimal(by_kod["X2"]["hydraulic_hours"]) == Decimal("100")
-    assert Decimal(by_kod["X3"]["hydraulic_hours"]) == Decimal("150")
+    assert Decimal(by_kod["X1"]["custom_bathroom_hours"]) == Decimal("80")
+    assert Decimal(by_kod["X2"]["custom_bathroom_hours"]) == Decimal("100")
+    assert Decimal(by_kod["X3"]["custom_bathroom_hours"]) == Decimal("150")
+    assert Decimal(by_kod["X1"]["hydraulic_hours"]) == Decimal("0")
     assert report.unrecognized_values == []
 
 
@@ -157,10 +158,14 @@ def test_kuchnia_sums_with_lazienka(operation_times):
     assert Decimal(records[0]["hydraulic_hours"]) == Decimal("10") + Decimal("10")
 
 
-def test_statyka_sums_with_kratownica(operation_times):
+def test_statyka_and_kratownica_together_is_conflict(operation_times):
+    # Pełna konstrukcja/statyka i kratownica wykluczają się wzajemnie.
     rows = [_make_row(kod="X1", status="Logistyka", statyka="Tak", kratownica="Tak")]
-    _, records = analyze_workbook(_build_workbook(rows))
-    assert Decimal(records[0]["welding_hours"]) == Decimal("12") + Decimal("4")
+    report, records = analyze_workbook(_build_workbook(rows))
+    assert records[0]["status_classification"] == "CONFLICT"
+    assert records[0]["is_counted"] is False
+    assert Decimal(records[0]["welding_hours"]) == Decimal("0")
+    assert report.conflict_count == 1
 
 
 def test_fibo_and_boazeria_sum_in_shared_brigade(operation_times):

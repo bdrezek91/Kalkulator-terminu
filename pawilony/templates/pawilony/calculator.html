@@ -8,6 +8,9 @@
                 <p class="text-muted">Zaznacz wyposażenie nowego pawilonu, aby otrzymać najwcześniejszy bezpieczny termin realizacji.</p>
                 <form method="post" novalidate>
                     {% csrf_token %}
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+                    {% endif %}
 
                     <h2 class="h6 text-uppercase text-muted mt-4">Hydraulika</h2>
                     <div class="mb-3">
@@ -37,6 +40,7 @@
                     <div class="form-check mb-3">
                         {{ form.kratownica }}
                         <label class="form-check-label" for="{{ form.kratownica.id_for_label }}">{{ form.kratownica.label }}</label>
+                        <div class="form-text">Pełna konstrukcja/statyka i kratownica wykluczają się wzajemnie.</div>
                     </div>
 
                     <h2 class="h6 text-uppercase text-muted mt-4">Wykończenie</h2>
@@ -114,6 +118,7 @@
                     <li>Hydraulicy: {{ hours_result.hydraulic_hours }} h</li>
                     <li>Spawacze: {{ hours_result.welding_hours }} h</li>
                     <li>FIBO/boazeria: {{ hours_result.fibo_wood_hours }} h</li>
+                    <li>Niestandardowe łazienki: {{ hours_result.custom_bathroom_hours }} h</li>
                     <li class="text-muted">Informacyjnie (nie ogranicza terminu w MVP): {{ hours_result.informational_hours }} h</li>
                 </ul>
 
@@ -164,6 +169,17 @@ document.addEventListener("DOMContentLoaded", function () {
     if (lazienka) {
         lazienka.addEventListener("change", sync);
         sync();
+    }
+
+    var pelnaStatyka = document.getElementById("id_pelna_statyka");
+    var kratownica = document.getElementById("id_kratownica");
+    if (pelnaStatyka && kratownica) {
+        pelnaStatyka.addEventListener("change", function () {
+            if (pelnaStatyka.checked) kratownica.checked = false;
+        });
+        kratownica.addEventListener("change", function () {
+            if (kratownica.checked) pelnaStatyka.checked = false;
+        });
     }
 });
 </script>

@@ -113,6 +113,26 @@
                 {% endif %}
             </div>
         </div>
+
+        <div class="card mb-4">
+            <div class="card-body">
+                <h2 class="h6">Niestandardowe łazienki</h2>
+                <p class="small text-muted mb-2">Osobna pula mocy, niezależna od standardowej hydrauliki.</p>
+                <table class="table table-sm mb-2">
+                    <tbody>
+                        {% for wariant, n in breakdown.toaleta_niestandardowa.items %}
+                        <tr><td>{{ wariant }}</td><td class="text-end">{{ n }}</td></tr>
+                        {% empty %}
+                        <tr><td colspan="2" class="text-muted">brak</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <p class="mb-0"><strong>Suma godzin w kolejce:</strong> {{ backlog.custom_bathroom_hours }} h</p>
+                {% if manual_totals.CUSTOM_BATHROOM %}
+                <p class="small text-muted mb-0">w tym {{ manual_totals.CUSTOM_BATHROOM }} h z ręcznej korekty administratora</p>
+                {% endif %}
+            </div>
+        </div>
     </div>
 </div>
 

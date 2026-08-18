@@ -22,6 +22,7 @@ BRIGADE_LABELS = {
     "hydraulic": "Hydraulicy",
     "welding": "Spawacze",
     "fibo_wood": "FIBO/boazeria",
+    "custom_bathroom": "Niestandardowe łazienki",
 }
 
 
@@ -31,6 +32,7 @@ class BacklogTotals:
     hydraulic_hours: Decimal = Decimal("0")
     welding_hours: Decimal = Decimal("0")
     fibo_wood_hours: Decimal = Decimal("0")
+    custom_bathroom_hours: Decimal = Decimal("0")
 
 
 @dataclass
@@ -122,6 +124,12 @@ def calculate_earliest_week(
             backlog.fibo_wood_hours,
             new_pavilion_hours.fibo_wood_hours,
             config.effective_fibo_wood_capacity_hours,
+        ),
+        brigade_weeks(
+            "custom_bathroom",
+            backlog.custom_bathroom_hours,
+            new_pavilion_hours.custom_bathroom_hours,
+            config.effective_custom_bathroom_capacity_hours,
         ),
     ]
 

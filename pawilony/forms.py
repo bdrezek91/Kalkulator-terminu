@@ -58,6 +58,10 @@ class CalculatorForm(forms.Form):
             # Łazienka jest kompletem — toaleta i samodzielny prysznic nie zwiększają godzin.
             cleaned["toaleta"] = ""
             cleaned["prysznic"] = False
+        if cleaned.get("pelna_statyka") and cleaned.get("kratownica"):
+            raise ValidationError(
+                "Pełna konstrukcja/statyka i kratownica wykluczają się — wybierz jedną z opcji."
+            )
         return cleaned
 
 

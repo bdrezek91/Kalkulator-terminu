@@ -10,6 +10,7 @@ WORK_CENTERS = [
     (WorkCenter.Code.HYDRAULIC, "Hydraulicy"),
     (WorkCenter.Code.WELDING, "Spawacze"),
     (WorkCenter.Code.FIBO_WOOD, "FIBO / boazeria"),
+    (WorkCenter.Code.CUSTOM_BATHROOM, "Niestandardowe łazienki"),
 ]
 
 # code, name, work_center, hours, affects_term
@@ -22,9 +23,10 @@ OPERATION_TIMES = [
     ("toaleta_komfort", "Toaleta Komfort", WorkCenter.Code.HYDRAULIC, "12", True),
     ("toaleta_premium", "Toaleta Premium", WorkCenter.Code.HYDRAULIC, "10", True),
     # Niestandardowe warianty WC potwierdzone z produkcją (korespondencja Dampol/DIT, sierpień 2026).
-    ("toaleta_fibo", "WC Fibo", WorkCenter.Code.HYDRAULIC, "80", True),
-    ("toaleta_premium_plytki", "WC Premium płytki", WorkCenter.Code.HYDRAULIC, "100", True),
-    ("toaleta_premium_boazeria", "WC Premium + boazeria", WorkCenter.Code.HYDRAULIC, "150", True),
+    # Mają WŁASNĄ pulę mocy (CUSTOM_BATHROOM), osobną od standardowej hydrauliki.
+    ("toaleta_fibo", "WC Fibo", WorkCenter.Code.CUSTOM_BATHROOM, "80", True),
+    ("toaleta_premium_plytki", "WC Premium płytki", WorkCenter.Code.CUSTOM_BATHROOM, "100", True),
+    ("toaleta_premium_boazeria", "WC Premium + boazeria", WorkCenter.Code.CUSTOM_BATHROOM, "150", True),
     ("lazienka_standard", "Łazienka Standard", WorkCenter.Code.HYDRAULIC, "7", True),
     ("lazienka_komfort", "Łazienka Komfort", WorkCenter.Code.HYDRAULIC, "10", True),
     ("lazienka_premium", "Łazienka Premium", WorkCenter.Code.HYDRAULIC, "10", True),
@@ -69,6 +71,7 @@ class Command(BaseCommand):
                 hydraulic_workers=8,
                 welding_workers=8,
                 fibo_wood_workers=3,
+                custom_bathroom_workers=3,
                 hours_per_worker_week=Decimal("40"),
                 safety_buffer_percent=Decimal("15"),
                 stale_data_warning_hours=24,

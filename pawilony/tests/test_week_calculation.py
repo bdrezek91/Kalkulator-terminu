@@ -63,6 +63,29 @@ def test_brigade_not_required_has_zero_weeks(active_config):
     assert hydraulic_outcome.weeks == 0
 
 
+def test_custom_bathroom_is_separate_pool_and_can_be_bottleneck(active_config):
+    # Niestandardowe łazienki mają WŁASNĄ pulę mocy, osobną od hydrauliki —
+    # duży backlog hydrauliki nie powinien wpływać na tę pulę i odwrotnie.
+    backlog = BacklogTotals(
+        base_units=0,
+        hydraulic_hours=Decimal("0"),
+        welding_hours=Decimal("0"),
+        fibo_wood_hours=Decimal("0"),
+        custom_bathroom_hours=Decimal("500"),
+    )
+    new_pavilion = HoursResult(custom_bathroom_hours=Decimal("80"))
+    result = calculate_earliest_week(backlog, new_pavilion, active_config, today=date(2026, 8, 17))
+    assert result.bottleneck_key == "custom_bathroom"
+    custom_outcome = next(o for o in result.brigade_outcomes if o.key == "custom_bathroom")
+    # (500+80) / (3 * 40 * 0.85 = 102) = 5.68 -> ceil = 6
+    assert custom_outcome.weeks == 6
+    assert result.result_weeks == 6
+
+    hydraulic_outcome = next(o for o in result.brigade_outcomes if o.key == "hydraulic")
+    assert hydraulic_outcome.required is False
+    assert hydraulic_outcome.weeks == 0
+
+
 def test_iso_week_year_boundary(active_config):
     # Startujemy tuż przed przełomem roku, wymuszamy dużo tygodni żeby przejść na kolejny rok
     backlog = BacklogTotals(base_units=0, hydraulic_hours=Decimal("0"), welding_hours=Decimal("0"), fibo_wood_hours=Decimal("0"))

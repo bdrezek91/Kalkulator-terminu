@@ -20,9 +20,12 @@ def test_toaleta_variants(operation_times):
 
 
 def test_toaleta_custom_wc_variants(operation_times):
-    assert calculate_hours(PavilionEquipment(toaleta="Fibo")).hydraulic_hours == Decimal("80")
-    assert calculate_hours(PavilionEquipment(toaleta="Premium płytki")).hydraulic_hours == Decimal("100")
-    assert calculate_hours(PavilionEquipment(toaleta="Premium + boazeria")).hydraulic_hours == Decimal("150")
+    # Niestandardowe warianty WC mają własną pulę mocy — liczą się jako
+    # custom_bathroom_hours, nie hydraulic_hours.
+    assert calculate_hours(PavilionEquipment(toaleta="Fibo")).custom_bathroom_hours == Decimal("80")
+    assert calculate_hours(PavilionEquipment(toaleta="Fibo")).hydraulic_hours == Decimal("0")
+    assert calculate_hours(PavilionEquipment(toaleta="Premium płytki")).custom_bathroom_hours == Decimal("100")
+    assert calculate_hours(PavilionEquipment(toaleta="Premium + boazeria")).custom_bathroom_hours == Decimal("150")
 
 
 def test_lazienka_replaces_toaleta_and_prysznic(operation_times):
@@ -37,6 +40,9 @@ def test_kuchnia_sums_with_lazienka(operation_times):
 
 
 def test_statyka_sums_with_kratownica(operation_times):
+    # Mechanika czystego liczenia godzin — sumuje, gdyby oba flagi trafiły tutaj.
+    # W praktyce ta kombinacja jest zablokowana wcześniej (formularz/import), bo
+    # pełna konstrukcja/statyka i kratownica wykluczają się biznesowo.
     result = calculate_hours(PavilionEquipment(pelna_statyka=True, kratownica=True))
     assert result.welding_hours == Decimal("12") + Decimal("4")
 

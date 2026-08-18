@@ -38,16 +38,21 @@ def test_reference_file_row_and_active_counts(operation_times):
     assert exact_active_status_rows == 504
 
     # Wiersze z mieszanym statusem aktywny+zakończony trafiają do konfliktów,
-    # a nie do aktywnych — w tym pliku jest ich 7.
-    assert report.conflict_count == 7
+    # a nie do aktywnych — w tym pliku jest ich 7. Dodatkowo 14 wierszy ma
+    # jednocześnie "Pełna konstrukcja/statyka" i "Kratownica" — te dwie opcje
+    # wykluczają się biznesowo, więc też trafiają do konfliktów (reguła
+    # dodana po korekcie z sierpnia 2026, patrz seed_defaults/migracje).
+    assert report.conflict_count == 7 + 14
 
     # 431 z pierwotnej analizy nie uwzględniało rozpoznawania modułów bez
     # nawiasów (np. "... MODUŁ 1" na końcu nazwy, bez otaczających nawiasów),
-    # które nasz parser poprawnie rozpoznaje zamiast zgłaszać jako konflikt.
-    # Po doliczeniu tych dodatkowych, poprawnie rozpoznanych wierszy z modułem 1
-    # wynik referencyjny dla liczonych pozycji wynosi 433.
+    # które nasz parser poprawnie rozpoznaje zamiast zgłaszać jako konflikt —
+    # to dawałoby 433. Po dodaniu reguły wykluczającej pełną konstrukcję i
+    # kratownicę tylko 3 z tych 14 nowych konfliktów pokrywały się z wcześniej
+    # liczonymi wierszami (pozostałe były już wykluczone z innych powodów,
+    # np. moduł 2+), więc wynik referencyjny to 433 - 3 = 430.
     counted = [r for r in records if r["is_counted"]]
-    assert len(counted) == 433
+    assert len(counted) == 430
 
     # plik źródłowy nie zawiera jeszcze kolumn FIBO/BOAZERIA
     assert report.fibo_column_present is False

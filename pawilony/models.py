@@ -21,13 +21,14 @@ def import_upload_path(instance, filename):
 
 
 class WorkCenter(models.Model):
-    """Brygada / centrum pracy: produkcja ogólna, hydraulicy, spawacze, FIBO+boazeria."""
+    """Brygada / centrum pracy: produkcja ogólna, hydraulicy, spawacze, FIBO+boazeria, niestandardowe łazienki."""
 
     class Code(models.TextChoices):
         BASE = "BASE", "Produkcja ogólna"
         HYDRAULIC = "HYDRAULIC", "Hydraulicy"
         WELDING = "WELDING", "Spawacze"
         FIBO_WOOD = "FIBO_WOOD", "FIBO / boazeria"
+        CUSTOM_BATHROOM = "CUSTOM_BATHROOM", "Niestandardowe łazienki"
 
     code = models.CharField(max_length=20, choices=Code.choices, unique=True)
     name = models.CharField(max_length=100)
@@ -76,6 +77,9 @@ class CapacityConfiguration(models.Model):
     hydraulic_workers = models.PositiveIntegerField(default=8, verbose_name="Liczba hydraulików")
     welding_workers = models.PositiveIntegerField(default=8, verbose_name="Liczba spawaczy")
     fibo_wood_workers = models.PositiveIntegerField(default=3, verbose_name="Liczba os. FIBO/boazeria")
+    custom_bathroom_workers = models.PositiveIntegerField(
+        default=3, verbose_name="Liczba os. niestandardowe łazienki"
+    )
     hours_per_worker_week = models.DecimalField(
         max_digits=6, decimal_places=2, default=Decimal("40"),
         verbose_name="Godziny pracy na osobę / tydzień",
@@ -120,6 +124,10 @@ class CapacityConfiguration(models.Model):
     def effective_fibo_wood_capacity_hours(self) -> Decimal:
         return Decimal(self.fibo_wood_workers) * self.hours_per_worker_week * self.buffer_factor
 
+    @property
+    def effective_custom_bathroom_capacity_hours(self) -> Decimal:
+        return Decimal(self.custom_bathroom_workers) * self.hours_per_worker_week * self.buffer_factor
+
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         if self.is_active:
@@ -136,6 +144,7 @@ class ManualBacklogAdjustment(models.Model):
         HYDRAULIC = "HYDRAULIC", "Hydraulicy"
         WELDING = "WELDING", "Spawacze"
         FIBO_WOOD = "FIBO_WOOD", "FIBO / boazeria"
+        CUSTOM_BATHROOM = "CUSTOM_BATHROOM", "Niestandardowe łazienki"
 
     work_center_code = models.CharField(max_length=20, choices=Brygada.choices)
     hours = models.DecimalField(max_digits=10, decimal_places=2)
@@ -238,6 +247,7 @@ class PavilionSnapshot(models.Model):
     hydraulic_hours = models.DecimalField(max_digits=8, decimal_places=2, default=Decimal("0"))
     welding_hours = models.DecimalField(max_digits=8, decimal_places=2, default=Decimal("0"))
     fibo_wood_hours = models.DecimalField(max_digits=8, decimal_places=2, default=Decimal("0"))
+    custom_bathroom_hours = models.DecimalField(max_digits=8, decimal_places=2, default=Decimal("0"))
 
     conflict_reasons = models.JSONField(default=list, blank=True)
     warnings = models.JSONField(default=list, blank=True)

@@ -16,13 +16,16 @@ HYDRAULIC_CODES = {
     ("toaleta", "standard"): "toaleta_standard",
     ("toaleta", "komfort"): "toaleta_komfort",
     ("toaleta", "premium"): "toaleta_premium",
-    # Niestandardowe warianty WC potwierdzone z produkcją (sierpień 2026).
-    ("toaleta", "fibo"): "toaleta_fibo",
-    ("toaleta", "premium płytki"): "toaleta_premium_plytki",
-    ("toaleta", "premium + boazeria"): "toaleta_premium_boazeria",
     ("lazienka", "standard"): "lazienka_standard",
     ("lazienka", "komfort"): "lazienka_komfort",
     ("lazienka", "premium"): "lazienka_premium",
+}
+# Niestandardowe warianty WC (sierpień 2026) — mają WŁASNĄ pulę mocy (brygada
+# "Niestandardowe łazienki"), osobną od standardowej hydrauliki.
+CUSTOM_BATHROOM_CODES = {
+    "fibo": "toaleta_fibo",
+    "premium płytki": "toaleta_premium_plytki",
+    "premium + boazeria": "toaleta_premium_boazeria",
 }
 PRYSZNIC_CODE = "prysznic_samodzielny"
 STATYKA_CODE = "statyka_pelna"
@@ -66,12 +69,18 @@ class HoursResult:
     hydraulic_hours: Decimal = Decimal("0")
     welding_hours: Decimal = Decimal("0")
     fibo_wood_hours: Decimal = Decimal("0")
+    custom_bathroom_hours: Decimal = Decimal("0")
     informational_hours: Decimal = Decimal("0")
     warnings: list[str] = field(default_factory=list)
 
     @property
     def is_custom(self) -> bool:
-        return self.hydraulic_hours > 0 or self.welding_hours > 0 or self.fibo_wood_hours > 0
+        return (
+            self.hydraulic_hours > 0
+            or self.welding_hours > 0
+            or self.fibo_wood_hours > 0
+            or self.custom_bathroom_hours > 0
+        )
 
 
 def _op_hours(op_hours: dict[str, Decimal], code: str, warnings: list[str]) -> Decimal:
@@ -90,6 +99,7 @@ def calculate_hours(equipment: PavilionEquipment, op_hours: dict[str, Decimal] |
     hydraulic = Decimal("0")
     welding = Decimal("0")
     fibo_wood = Decimal("0")
+    custom_bathroom = Decimal("0")
     informational = Decimal("0")
 
     if equipment.kuchnia:
@@ -110,11 +120,15 @@ def calculate_hours(equipment: PavilionEquipment, op_hours: dict[str, Decimal] |
     else:
         if equipment.toaleta:
             key = equipment.toaleta.strip().lower()
-            code = HYDRAULIC_CODES.get(("toaleta", key))
-            if code:
-                hydraulic += _op_hours(op_hours, code, warnings)
+            custom_code = CUSTOM_BATHROOM_CODES.get(key)
+            if custom_code:
+                custom_bathroom += _op_hours(op_hours, custom_code, warnings)
             else:
-                warnings.append(f"Nierozpoznany wariant toalety: '{equipment.toaleta}'")
+                code = HYDRAULIC_CODES.get(("toaleta", key))
+                if code:
+                    hydraulic += _op_hours(op_hours, code, warnings)
+                else:
+                    warnings.append(f"Nierozpoznany wariant toalety: '{equipment.toaleta}'")
         if equipment.prysznic:
             hydraulic += _op_hours(op_hours, PRYSZNIC_CODE, warnings)
 
@@ -139,6 +153,7 @@ def calculate_hours(equipment: PavilionEquipment, op_hours: dict[str, Decimal] |
         hydraulic_hours=hydraulic,
         welding_hours=welding,
         fibo_wood_hours=fibo_wood,
+        custom_bathroom_hours=custom_bathroom,
         informational_hours=informational,
         warnings=warnings,
     )
