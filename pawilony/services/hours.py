@@ -20,12 +20,12 @@ HYDRAULIC_CODES = {
     ("lazienka", "komfort"): "lazienka_komfort",
     ("lazienka", "premium"): "lazienka_premium",
 }
-# Niezależne, łączalne dodatki do WC/łazienki (sierpień 2026) — nie są wariantem
-# pola Toaleta/Łazienka, tylko osobnymi flagami, które można doczepić do
-# dowolnego wyboru (Standard/Komfort/Premium/brak). Mają WŁASNĄ pulę mocy
-# (brygada "Niestandardowe łazienki"), osobną od standardowej hydrauliki.
-WC_ADDON_FIBO_CODE = "wc_addon_fibo"
-WC_ADDON_PLYTKI_CODE = "wc_addon_plytki"
+# Boazeria WC/łazienki (sierpień 2026) — jedyny pozostały niezależny, łączalny
+# dodatek: NIE jest wariantem pola Toaleta/Łazienka, tylko osobną flagą, którą
+# można doczepić do dowolnego wyboru (Standard/Komfort/Premium/brak). Fibo i
+# Płytki NIE są już osobnymi dodatkami — ich godziny są wliczone na stałe
+# w warianty Komfort/Premium Toalety i Łazienki (patrz HYDRAULIC_CODES).
+# Ma WŁASNĄ pulę mocy (brygada "Niestandardowe łazienki"), osobną od hydrauliki.
 WC_ADDON_BOAZERIA_CODE = "wc_addon_boazeria"
 PRYSZNIC_CODE = "prysznic_samodzielny"
 STATYKA_CODE = "statyka_pelna"
@@ -59,10 +59,8 @@ class PavilionEquipment:
     kratownica: bool = False
     fibo: bool = False
     boazeria: bool = False
-    # Niezależne dodatki do WC/łazienki (dowolny wariant), osobna pula mocy —
+    # Niezależny dodatek do WC/łazienki (dowolny wariant), osobna pula mocy —
     # nie mylić z `fibo`/`boazeria` powyżej (brygada FIBO/boazeria, ściany pawilonu).
-    wc_addon_fibo: bool = False
-    wc_addon_plytki: bool = False
     wc_addon_boazeria: bool = False
     stolarka_nst: bool = False
     zaluzje_fasadowe: bool = False
@@ -133,12 +131,7 @@ def calculate_hours(equipment: PavilionEquipment, op_hours: dict[str, Decimal] |
         if equipment.prysznic:
             hydraulic += _op_hours(op_hours, PRYSZNIC_CODE, warnings)
 
-    # Dodatki WC/łazienki — niezależne od wariantu (Toaleta lub Łazienka) i od
-    # siebie nawzajem; mogą wystąpić w dowolnej kombinacji, sumują się.
-    if equipment.wc_addon_fibo:
-        custom_bathroom += _op_hours(op_hours, WC_ADDON_FIBO_CODE, warnings)
-    if equipment.wc_addon_plytki:
-        custom_bathroom += _op_hours(op_hours, WC_ADDON_PLYTKI_CODE, warnings)
+    # Dodatek Boazeria WC/łazienki — niezależny od wariantu (Toaleta lub Łazienka).
     if equipment.wc_addon_boazeria:
         custom_bathroom += _op_hours(op_hours, WC_ADDON_BOAZERIA_CODE, warnings)
 

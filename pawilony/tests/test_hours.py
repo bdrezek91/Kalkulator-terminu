@@ -14,35 +14,29 @@ def test_kuchnia_lux(operation_times):
 
 
 def test_toaleta_variants(operation_times):
+    # Komfort/Premium mają już wliczone godziny Fibo/Płytki (nie są to osobne
+    # dodatki): Toaleta Standard 7h, Komfort 12+40=52h, Premium 10+45=55h.
     assert calculate_hours(PavilionEquipment(toaleta="Standard")).hydraulic_hours == Decimal("7")
-    assert calculate_hours(PavilionEquipment(toaleta="Komfort")).hydraulic_hours == Decimal("12")
-    assert calculate_hours(PavilionEquipment(toaleta="Premium")).hydraulic_hours == Decimal("10")
+    assert calculate_hours(PavilionEquipment(toaleta="Komfort")).hydraulic_hours == Decimal("52")
+    assert calculate_hours(PavilionEquipment(toaleta="Premium")).hydraulic_hours == Decimal("55")
 
 
-def test_wc_addons_are_independent_of_toaleta_variant(operation_times):
-    # Dodatki WC/łazienki mają własną pulę mocy (custom_bathroom_hours) i
-    # doliczają się NIEZALEŻNIE od wybranego wariantu Toalety/Łazienki.
-    result = calculate_hours(PavilionEquipment(toaleta="Standard", wc_addon_fibo=True))
+def test_wc_addon_boazeria_is_independent_of_toaleta_variant(operation_times):
+    # Dodatek Boazeria ma własną pulę mocy (custom_bathroom_hours) i dolicza
+    # się NIEZALEŻNIE od wybranego wariantu Toalety/Łazienki.
+    result = calculate_hours(PavilionEquipment(toaleta="Standard", wc_addon_boazeria=True))
     assert result.hydraulic_hours == Decimal("7")
-    assert result.custom_bathroom_hours == Decimal("80")
+    assert result.custom_bathroom_hours == Decimal("150")
 
 
-def test_wc_addons_combine_with_each_other(operation_times):
-    # Można łączyć dowolną kombinację dodatków — godziny się sumują.
-    result = calculate_hours(
-        PavilionEquipment(wc_addon_fibo=True, wc_addon_plytki=True, wc_addon_boazeria=True)
-    )
-    assert result.custom_bathroom_hours == Decimal("80") + Decimal("100") + Decimal("150")
+def test_wc_addon_boazeria_works_with_lazienka_too(operation_times):
+    # Dodatek działa zarówno przy Toalecie, jak i przy Łazience.
+    result = calculate_hours(PavilionEquipment(lazienka="Premium", wc_addon_boazeria=True))
+    assert result.hydraulic_hours == Decimal("100")
+    assert result.custom_bathroom_hours == Decimal("150")
 
 
-def test_wc_addon_works_with_lazienka_too(operation_times):
-    # Dodatki działają zarówno przy Toalecie, jak i przy Łazience.
-    result = calculate_hours(PavilionEquipment(lazienka="Premium", wc_addon_plytki=True))
-    assert result.hydraulic_hours == Decimal("10")
-    assert result.custom_bathroom_hours == Decimal("100")
-
-
-def test_wc_addon_without_any_toaleta_or_lazienka(operation_times):
+def test_wc_addon_boazeria_without_any_toaleta_or_lazienka(operation_times):
     # Dodatek sam w sobie, bez wybranej toalety/łazienki, wciąż się liczy.
     result = calculate_hours(PavilionEquipment(wc_addon_boazeria=True))
     assert result.hydraulic_hours == Decimal("0")
@@ -51,13 +45,13 @@ def test_wc_addon_without_any_toaleta_or_lazienka(operation_times):
 
 def test_lazienka_replaces_toaleta_and_prysznic(operation_times):
     result = calculate_hours(PavilionEquipment(lazienka="Standard", toaleta="Premium", prysznic=True))
-    # tylko łazienka się liczy — 7h, nie 7+10+8
+    # tylko łazienka się liczy — 7h, nie 7+55+8
     assert result.hydraulic_hours == Decimal("7")
 
 
 def test_kuchnia_sums_with_lazienka(operation_times):
     result = calculate_hours(PavilionEquipment(kuchnia="Lux", lazienka="Premium"))
-    assert result.hydraulic_hours == Decimal("10") + Decimal("10")
+    assert result.hydraulic_hours == Decimal("10") + Decimal("100")
 
 
 def test_statyka_sums_with_kratownica(operation_times):

@@ -80,8 +80,6 @@ class CalculatorView(View):
             kratownica=cleaned.get("kratownica", False),
             fibo=cleaned.get("fibo", False),
             boazeria=cleaned.get("boazeria", False),
-            wc_addon_fibo=cleaned.get("wc_addon_fibo", False),
-            wc_addon_plytki=cleaned.get("wc_addon_plytki", False),
             wc_addon_boazeria=cleaned.get("wc_addon_boazeria", False),
             stolarka_nst=cleaned.get("stolarka_nst", False),
             zaluzje_fasadowe=cleaned.get("zaluzje_fasadowe", False),

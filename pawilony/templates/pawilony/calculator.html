@@ -32,16 +32,7 @@
                         <div class="form-text">Nieaktywne, jeśli wybrano łazienkę.</div>
                     </div>
 
-                    <h3 class="h6 text-muted mt-3 mb-2">Dodatki WC/łazienki (niestandardowe)</h3>
-                    <p class="form-text mt-0 mb-2">Można łączyć dowolnie, niezależnie od wybranego wariantu Toalety lub Łazienki. Osobna pula mocy.</p>
-                    <div class="form-check mb-2">
-                        {{ form.wc_addon_fibo }}
-                        <label class="form-check-label" for="{{ form.wc_addon_fibo.id_for_label }}">{{ form.wc_addon_fibo.label }}</label>
-                    </div>
-                    <div class="form-check mb-2">
-                        {{ form.wc_addon_plytki }}
-                        <label class="form-check-label" for="{{ form.wc_addon_plytki.id_for_label }}">{{ form.wc_addon_plytki.label }}</label>
-                    </div>
+                    <p class="form-text mt-0 mb-2">Godziny Fibo/Płytki są już wliczone w warianty Komfort/Premium powyżej.</p>
                     <div class="form-check mb-3">
                         {{ form.wc_addon_boazeria }}
                         <label class="form-check-label" for="{{ form.wc_addon_boazeria.id_for_label }}">{{ form.wc_addon_boazeria.label }}</label>

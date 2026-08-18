@@ -98,10 +98,8 @@ class EquipmentBreakdown:
     kratownica_count: int = 0
     fibo_count: int = 0
     boazeria_count: int = 0
-    # Niezależne dodatki WC/łazienki (własna pula mocy) — patrz uwaga w
-    # compute_equipment_breakdown o braku kolumn źródłowych w Optimie.
-    wc_addon_fibo_count: int = 0
-    wc_addon_plytki_count: int = 0
+    # Niezależny dodatek WC/łazienki (własna pula mocy) — patrz uwaga w
+    # compute_equipment_breakdown o braku kolumny źródłowej w Optimie.
     wc_addon_boazeria_count: int = 0
 
 
@@ -137,9 +135,7 @@ def compute_equipment_breakdown(batch: ImportBatch | None) -> EquipmentBreakdown
         kratownica_count=counted.filter(kratownica=True).count(),
         fibo_count=counted.filter(fibo=True).count(),
         boazeria_count=counted.filter(boazeria=True).count(),
-        # Eksport Optima nie ma jeszcze osobnych kolumn dla tych dodatków —
-        # zawsze 0, dopóki firma nie doda odpowiednich atrybutów do eksportu.
-        wc_addon_fibo_count=counted.filter(wc_fibo=True).count(),
-        wc_addon_plytki_count=counted.filter(wc_plytki=True).count(),
+        # Eksport Optima nie ma jeszcze osobnej kolumny dla tego dodatku —
+        # zawsze 0, dopóki firma nie doda odpowiedniego atrybutu do eksportu.
         wc_addon_boazeria_count=counted.filter(wc_boazeria=True).count(),
     )

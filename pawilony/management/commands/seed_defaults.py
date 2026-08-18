@@ -15,22 +15,22 @@ WORK_CENTERS = [
 
 # code, name, work_center, hours, affects_term
 OPERATION_TIMES = [
-    # Wartości hydrauliki potwierdzone z produkcją (korespondencja Dampol/DIT, sierpień 2026):
-    # Kuchnia: jedna stawka niezależnie od wariantu; Toaleta/Łazienka wg tabeli Standard/Komfort/Premium.
+    # Wartości hydrauliki potwierdzone z produkcją (korespondencja Dampol/DIT, sierpień 2026,
+    # druga tura): Kuchnia — jedna stawka niezależnie od wariantu. Toaleta/Łazienka Komfort
+    # i Premium mają na stałe wliczone godziny Fibo/Płytki (nie są to osobne dodatki) —
+    # Łazienka: Standard 7h, Komfort 10+80=90h, Premium 10+90=100h;
+    # Toaleta:  Standard 7h, Komfort 12+40=52h, Premium 10+45=55h.
     ("kuchnia_standard", "Kuchnia Standard", WorkCenter.Code.HYDRAULIC, "10", True),
     ("kuchnia_lux", "Kuchnia Lux", WorkCenter.Code.HYDRAULIC, "10", True),
     ("toaleta_standard", "Toaleta Standard", WorkCenter.Code.HYDRAULIC, "7", True),
-    ("toaleta_komfort", "Toaleta Komfort", WorkCenter.Code.HYDRAULIC, "12", True),
-    ("toaleta_premium", "Toaleta Premium", WorkCenter.Code.HYDRAULIC, "10", True),
-    # Niezależne, łączalne dodatki do WC/łazienki (dowolny wariant) potwierdzone
-    # z produkcją (korespondencja Dampol/DIT, sierpień 2026). Mają WŁASNĄ pulę
-    # mocy (CUSTOM_BATHROOM), osobną od standardowej hydrauliki.
-    ("wc_addon_fibo", "WC/łazienka: Fibo (dodatkowo)", WorkCenter.Code.CUSTOM_BATHROOM, "80", True),
-    ("wc_addon_plytki", "WC/łazienka: Płytki (dodatkowo)", WorkCenter.Code.CUSTOM_BATHROOM, "100", True),
+    ("toaleta_komfort", "Toaleta Komfort", WorkCenter.Code.HYDRAULIC, "52", True),
+    ("toaleta_premium", "Toaleta Premium", WorkCenter.Code.HYDRAULIC, "55", True),
+    # Boazeria WC/łazienki jest jedynym pozostałym niezależnym, łączalnym dodatkiem
+    # (dowolny wariant Toalety/Łazienki) — ma WŁASNĄ pulę mocy (CUSTOM_BATHROOM).
     ("wc_addon_boazeria", "WC/łazienka: Boazeria (dodatkowo)", WorkCenter.Code.CUSTOM_BATHROOM, "150", True),
     ("lazienka_standard", "Łazienka Standard", WorkCenter.Code.HYDRAULIC, "7", True),
-    ("lazienka_komfort", "Łazienka Komfort", WorkCenter.Code.HYDRAULIC, "10", True),
-    ("lazienka_premium", "Łazienka Premium", WorkCenter.Code.HYDRAULIC, "10", True),
+    ("lazienka_komfort", "Łazienka Komfort", WorkCenter.Code.HYDRAULIC, "90", True),
+    ("lazienka_premium", "Łazienka Premium", WorkCenter.Code.HYDRAULIC, "100", True),
     ("prysznic_samodzielny", "Samodzielny prysznic", WorkCenter.Code.HYDRAULIC, "8", True),
     ("statyka_pelna", "Pełna konstrukcja / statyka", WorkCenter.Code.WELDING, "12", True),
     ("kratownica", "Kratownica", WorkCenter.Code.WELDING, "4", True),
