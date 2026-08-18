@@ -96,3 +96,25 @@ def test_no_equipment_is_not_custom(operation_times):
 def test_any_brigade_hours_marks_custom(operation_times):
     result = calculate_hours(PavilionEquipment(kratownica=True))
     assert result.is_custom is True
+
+
+def test_statyka_and_kratownica_multiplied_by_module_count(operation_times):
+    # Projekt wielomodułowy — każdy moduł wymaga własnej konstrukcji spawanej.
+    result = calculate_hours(PavilionEquipment(pelna_statyka=True, module_count=3))
+    assert result.welding_hours == Decimal("12") * 3
+
+
+def test_kratownica_multiplied_by_module_count(operation_times):
+    result = calculate_hours(PavilionEquipment(kratownica=True, module_count=2))
+    assert result.welding_hours == Decimal("4") * 2
+
+
+def test_module_count_does_not_affect_other_brigades(operation_times):
+    result = calculate_hours(PavilionEquipment(kuchnia="Lux", fibo=True, module_count=3))
+    assert result.hydraulic_hours == Decimal("10")
+    assert result.fibo_wood_hours == Decimal("50")
+
+
+def test_default_module_count_is_one(operation_times):
+    result = calculate_hours(PavilionEquipment(pelna_statyka=True))
+    assert result.welding_hours == Decimal("12")

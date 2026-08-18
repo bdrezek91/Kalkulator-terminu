@@ -40,6 +40,11 @@
                     </div>
 
                     <h2 class="h6 text-uppercase text-muted mt-4">Konstrukcja</h2>
+                    <div class="mb-3">
+                        <label class="form-label" for="{{ form.module_count.id_for_label }}">{{ form.module_count.label }}</label>
+                        {{ form.module_count }}
+                        <div class="form-text">Statyka/kratownica są liczone razy liczba modułów pawilonu.</div>
+                    </div>
                     <div class="form-check mb-2">
                         {{ form.pelna_statyka }}
                         <label class="form-check-label" for="{{ form.pelna_statyka.id_for_label }}">{{ form.pelna_statyka.label }}</label>

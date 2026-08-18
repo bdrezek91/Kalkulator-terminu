@@ -101,6 +101,31 @@ def test_modules_2_plus_skipped(operation_times):
     assert report.module_skipped_count == 1
 
 
+def test_statyka_hours_multiplied_by_total_project_modules(operation_times):
+    rows = [
+        _make_row(kod="X1", nazwa="Pawilon 10x3 nr projektu 1/1/2024 (MODUŁ 1)",
+                  status="Logistyka", statyka="Tak"),
+        _make_row(kod="X2", nazwa="Pawilon 10x3 nr projektu 1/1/2024 (MODUŁ 2)",
+                  status="Logistyka", statyka="Tak"),
+        _make_row(kod="X3", nazwa="Pawilon 10x3 nr projektu 1/1/2024 (MODUŁ 3)",
+                  status="Logistyka", statyka="Tak"),
+    ]
+    _, records = analyze_workbook(_build_workbook(rows))
+    by_kod = {r["kod"]: r for r in records}
+    # tylko moduł 1 wchodzi do kolejki, ale za to z godzinami razy 3 moduły
+    assert by_kod["X1"]["is_counted"] is True
+    assert Decimal(by_kod["X1"]["welding_hours"]) == Decimal("12") * 3
+    assert by_kod["X2"]["is_counted"] is False
+    assert by_kod["X3"]["is_counted"] is False
+
+
+def test_single_module_project_not_multiplied(operation_times):
+    rows = [_make_row(kod="X1", nazwa="Pawilon 5x3 nr projektu 1/1/2024",
+                       status="Logistyka", statyka="Tak")]
+    _, records = analyze_workbook(_build_workbook(rows))
+    assert Decimal(records[0]["welding_hours"]) == Decimal("12")
+
+
 def test_empty_value_and_pusty(operation_times):
     rows = [_make_row(kod="X1", status="Logistyka", kuchnia="{pusty}")]
     _, records = analyze_workbook(_build_workbook(rows))

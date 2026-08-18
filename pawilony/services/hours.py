@@ -57,6 +57,11 @@ class PavilionEquipment:
     prysznic: bool = False
     pelna_statyka: bool = False
     kratownica: bool = False
+    # Liczba modułów pawilonu (projekty wielomodułowe, np. "MODUŁ 1/2/3" w nazwie) —
+    # statyka/kratownica są liczone RAZY liczba modułów, bo każdy moduł wymaga
+    # własnej konstrukcji spawanej. Pozostałe brygady (hydraulika, FIBO/boazeria)
+    # są liczone per pawilon/wariant, niezależnie od liczby modułów.
+    module_count: int = 1
     fibo: bool = False
     boazeria: bool = False
     # Niezależny dodatek do WC/łazienki (dowolny wariant), osobna pula mocy —
@@ -135,10 +140,11 @@ def calculate_hours(equipment: PavilionEquipment, op_hours: dict[str, Decimal] |
     if equipment.wc_addon_boazeria:
         custom_bathroom += _op_hours(op_hours, WC_ADDON_BOAZERIA_CODE, warnings)
 
+    module_count = max(equipment.module_count, 1)
     if equipment.pelna_statyka:
-        welding += _op_hours(op_hours, STATYKA_CODE, warnings)
+        welding += _op_hours(op_hours, STATYKA_CODE, warnings) * module_count
     if equipment.kratownica:
-        welding += _op_hours(op_hours, KRATOWNICA_CODE, warnings)
+        welding += _op_hours(op_hours, KRATOWNICA_CODE, warnings) * module_count
 
     if equipment.fibo:
         fibo_wood += _op_hours(op_hours, FIBO_CODE, warnings)

@@ -1,6 +1,6 @@
 import pytest
 
-from pawilony.services.module_parser import is_counted_module, parse_module
+from pawilony.services.module_parser import is_counted_module, parse_module, project_key
 
 VARIANTS_MODULE_1 = [
     "Pawilon 10x2 nr projektu 07/04/2024 (moduł 1)",
@@ -45,3 +45,25 @@ def test_number_before_word_variant():
     result = parse_module("Pawilon 7x3 nr projektu 17/06/2026 (2 Moduł)")
     assert result.number == 2
     assert result.conflict is False
+
+
+def test_project_key_groups_module_siblings_module_after_project_number():
+    key1 = project_key("Pawilon 10x2 nr projektu 07/04/2024 (MODUŁ 1)")
+    key2 = project_key("Pawilon 10x2 nr projektu 07/04/2024 (MODUŁ 2)")
+    assert key1 == key2
+
+
+def test_project_key_groups_module_siblings_module_before_project_number():
+    key1 = project_key("Pawilon 10x3 (moduł 1) nr projektu 09/01/2024")
+    key2 = project_key("Pawilon 10x3 (moduł 2) nr projektu 09/01/2024")
+    assert key1 == key2
+
+
+def test_project_key_without_module_is_full_name_uppercased():
+    assert project_key("Pawilon 6x3 nr projektu 12/06/2024") == "PAWILON 6X3 NR PROJEKTU 12/06/2024"
+
+
+def test_project_key_different_projects_do_not_collide():
+    key1 = project_key("Pawilon 10x2 nr projektu 07/04/2024 (MODUŁ 1)")
+    key2 = project_key("Pawilon 10x3 nr projektu 07/04/2024 (MODUŁ 1)")
+    assert key1 != key2

@@ -70,7 +70,7 @@ class Command(BaseCommand):
                 is_active=True,
                 general_units_per_week=Decimal("45"),
                 hydraulic_workers=8,
-                welding_workers=8,
+                welding_workers=7,
                 fibo_wood_workers=3,
                 custom_bathroom_workers=3,
                 hours_per_worker_week=Decimal("40"),

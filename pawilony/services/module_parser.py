@@ -79,3 +79,39 @@ def is_counted_module(result: ModuleParseResult) -> bool:
     if not result.present:
         return True
     return result.number == 1
+
+
+def project_key(nazwa: str) -> str:
+    """
+    Klucz grupujący wiersze tego samego projektu wielomodułowego — nazwa
+    pawilonu z usuniętym oznaczeniem modułu (i sąsiadującym numerem, jeśli
+    to osobny token), znormalizowana do wielkich liter. Używany do policzenia,
+    ile modułów fizycznie ma dany projekt (np. dla mnożnika godzin spawaczy),
+    niezależnie od tego, który konkretnie wiersz jest liczony do kolejki.
+    """
+    if not nazwa:
+        return ""
+
+    tokens = _TOKEN_RE.findall(nazwa)
+    modu_idx = None
+    glued = False
+    for i, tok in enumerate(tokens):
+        stripped = _strip_punct(tok)
+        m = _MODU_TOKEN_RE.match(stripped)
+        if m:
+            modu_idx = i
+            glued = bool(m.group(1))
+            break
+
+    if modu_idx is None:
+        return " ".join(tokens).upper()
+
+    remove_idx = {modu_idx}
+    if not glued:
+        if modu_idx + 1 < len(tokens) and _DIGIT_TOKEN_RE.match(_strip_punct(tokens[modu_idx + 1])):
+            remove_idx.add(modu_idx + 1)
+        elif modu_idx - 1 >= 0 and _DIGIT_TOKEN_RE.match(_strip_punct(tokens[modu_idx - 1])):
+            remove_idx.add(modu_idx - 1)
+
+    remaining = [t for i, t in enumerate(tokens) if i not in remove_idx]
+    return " ".join(remaining).upper()

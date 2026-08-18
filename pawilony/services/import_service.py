@@ -19,7 +19,7 @@ from django.utils import timezone
 from pawilony.models import ImportBatch, PavilionSnapshot
 from pawilony.services.header_mapping import build_header_map
 from pawilony.services.hours import PavilionEquipment, calculate_hours, get_operation_hours_map
-from pawilony.services.module_parser import is_counted_module, parse_module
+from pawilony.services.module_parser import is_counted_module, parse_module, project_key
 from pawilony.services.normalization import normalize_bool, normalize_cell
 from pawilony.services.status_rules import classify_status
 
@@ -101,6 +101,21 @@ def analyze_workbook(file_obj) -> tuple[ImportReport, list[dict]]:
     records: list[dict] = []
     seen_active_kods: dict[str, int] = {}
 
+    # Pierwszy przebieg: policz liczbę modułów każdego projektu (wiersze
+    # oznaczone tym samym "MODUŁ n" w nazwie, po usunięciu oznaczenia modułu)
+    # — statyka/kratownica są liczone razy liczba modułów, więc musimy znać
+    # ją przed policzeniem godzin dla wiersza, który faktycznie wejdzie do kolejki.
+    all_rows = list(rows_iter)
+    module_counts_by_project: dict[str, int] = {}
+    for row in all_rows:
+        if row is None or all(v is None for v in row):
+            continue
+        nazwa_val = normalize_cell(_cell_value(row, field_map, "nazwa")).value or ""
+        mres = parse_module(nazwa_val)
+        if mres.present and not mres.conflict:
+            key = project_key(nazwa_val)
+            module_counts_by_project[key] = module_counts_by_project.get(key, 0) + 1
+
     hydraulic_total = Decimal("0")
     welding_total = Decimal("0")
     fibo_wood_total = Decimal("0")
@@ -108,7 +123,7 @@ def analyze_workbook(file_obj) -> tuple[ImportReport, list[dict]]:
     custom_count = 0
     standard_count = 0
 
-    for row_number, row in enumerate(rows_iter, start=2):
+    for row_number, row in enumerate(all_rows, start=2):
         if row is None or all(v is None for v in row):
             continue
         report.total_rows += 1
@@ -231,6 +246,11 @@ def analyze_workbook(file_obj) -> tuple[ImportReport, list[dict]]:
         if status_classification == "ACTIVE" and not module_ok and not module_result.conflict:
             report.module_skipped_count += 1
 
+        if module_result.present and not module_result.conflict:
+            row_module_count = module_counts_by_project.get(project_key(nazwa), 1)
+        else:
+            row_module_count = 1
+
         equipment = PavilionEquipment(
             kuchnia=kuchnia_val or None,
             toaleta=toaleta_val or None,
@@ -240,6 +260,7 @@ def analyze_workbook(file_obj) -> tuple[ImportReport, list[dict]]:
             kratownica=kratownica_bool,
             fibo=fibo_bool,
             boazeria=boazeria_bool,
+            module_count=row_module_count,
             stolarka_nst=bool(read_attr("stolarka_nst").value),
             zaluzje_fasadowe=bool(read_attr("zaluzje_fasadowe").value),
             rolety=bool(read_attr("rolety").value),

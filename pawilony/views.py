@@ -78,6 +78,7 @@ class CalculatorView(View):
             prysznic=cleaned.get("prysznic", False),
             pelna_statyka=cleaned.get("pelna_statyka", False),
             kratownica=cleaned.get("kratownica", False),
+            module_count=cleaned.get("module_count") or 1,
             fibo=cleaned.get("fibo", False),
             boazeria=cleaned.get("boazeria", False),
             wc_addon_boazeria=cleaned.get("wc_addon_boazeria", False),
