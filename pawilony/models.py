@@ -233,6 +233,13 @@ class PavilionSnapshot(models.Model):
     fibo = models.BooleanField(default=False)
     boazeria = models.BooleanField(default=False)
 
+    # Niezależne dodatki do WC/łazienki (dowolnego wariantu Standard/Komfort/Premium),
+    # własna pula mocy "Niestandardowe łazienki" — nie mylić z `fibo`/`boazeria` powyżej,
+    # które dotyczą ogólnej brygady FIBO/boazeria (wykończenie ścian pawilonu).
+    wc_fibo = models.BooleanField(default=False, verbose_name="WC/łazienka: Fibo (dodatkowo)")
+    wc_plytki = models.BooleanField(default=False, verbose_name="WC/łazienka: Płytki (dodatkowo)")
+    wc_boazeria = models.BooleanField(default=False, verbose_name="WC/łazienka: Boazeria (dodatkowo)")
+
     stolarka_nst_raw = models.CharField(max_length=50, blank=True)
     zaluzje_fasadowe_raw = models.CharField(max_length=50, blank=True)
     rolety_raw = models.CharField(max_length=50, blank=True)

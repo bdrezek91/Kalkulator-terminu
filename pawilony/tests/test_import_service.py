@@ -131,19 +131,15 @@ def test_toaleta_variants(operation_times):
     assert Decimal(by_kod["X3"]["hydraulic_hours"]) == Decimal("10")
 
 
-def test_toaleta_custom_wc_variants_recognized(operation_times):
-    rows = [
-        _make_row(kod="X1", status="Logistyka", toaleta="Fibo"),
-        _make_row(kod="X2", status="Logistyka", toaleta="Premium płytki"),
-        _make_row(kod="X3", status="Logistyka", toaleta="Premium + boazeria"),
-    ]
+def test_toaleta_no_longer_accepts_wc_addon_strings(operation_times):
+    # Fibo/Płytki/Boazeria są teraz niezależnymi dodatkami (osobne kolumny w
+    # przyszłości), nie wariantami pola Toaleta — jeśli ktoś wpisze je tam,
+    # to nierozpoznana wartość, a nie cichy sukces.
+    rows = [_make_row(kod="X1", status="Logistyka", toaleta="Fibo")]
     report, records = analyze_workbook(_build_workbook(rows))
-    by_kod = {r["kod"]: r for r in records}
-    assert Decimal(by_kod["X1"]["custom_bathroom_hours"]) == Decimal("80")
-    assert Decimal(by_kod["X2"]["custom_bathroom_hours"]) == Decimal("100")
-    assert Decimal(by_kod["X3"]["custom_bathroom_hours"]) == Decimal("150")
-    assert Decimal(by_kod["X1"]["hydraulic_hours"]) == Decimal("0")
-    assert report.unrecognized_values == []
+    assert records[0]["toaleta"] == ""
+    assert Decimal(records[0]["custom_bathroom_hours"]) == Decimal("0")
+    assert len(report.unrecognized_values) == 1
 
 
 def test_lazienka_replaces_toaleta_and_prysznic(operation_times):

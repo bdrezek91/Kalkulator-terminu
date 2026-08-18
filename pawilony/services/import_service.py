@@ -204,11 +204,7 @@ def analyze_workbook(file_obj) -> tuple[ImportReport, list[dict]]:
             return ""
 
         kuchnia_val = resolve_variant(kuchnia_norm, {"Standard", "Lux"}, "Kuchnia")
-        toaleta_val = resolve_variant(
-            toaleta_norm,
-            {"Standard", "Komfort", "Premium", "Fibo", "Premium płytki", "Premium + boazeria"},
-            "Toaleta",
-        )
+        toaleta_val = resolve_variant(toaleta_norm, {"Standard", "Komfort", "Premium"}, "Toaleta")
         lazienka_val = resolve_variant(lazienka_norm, {"Standard", "Komfort", "Premium"}, "Łazienka")
 
         status_classification = status_result.classification

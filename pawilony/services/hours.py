@@ -20,13 +20,13 @@ HYDRAULIC_CODES = {
     ("lazienka", "komfort"): "lazienka_komfort",
     ("lazienka", "premium"): "lazienka_premium",
 }
-# Niestandardowe warianty WC (sierpień 2026) — mają WŁASNĄ pulę mocy (brygada
-# "Niestandardowe łazienki"), osobną od standardowej hydrauliki.
-CUSTOM_BATHROOM_CODES = {
-    "fibo": "toaleta_fibo",
-    "premium płytki": "toaleta_premium_plytki",
-    "premium + boazeria": "toaleta_premium_boazeria",
-}
+# Niezależne, łączalne dodatki do WC/łazienki (sierpień 2026) — nie są wariantem
+# pola Toaleta/Łazienka, tylko osobnymi flagami, które można doczepić do
+# dowolnego wyboru (Standard/Komfort/Premium/brak). Mają WŁASNĄ pulę mocy
+# (brygada "Niestandardowe łazienki"), osobną od standardowej hydrauliki.
+WC_ADDON_FIBO_CODE = "wc_addon_fibo"
+WC_ADDON_PLYTKI_CODE = "wc_addon_plytki"
+WC_ADDON_BOAZERIA_CODE = "wc_addon_boazeria"
 PRYSZNIC_CODE = "prysznic_samodzielny"
 STATYKA_CODE = "statyka_pelna"
 KRATOWNICA_CODE = "kratownica"
@@ -59,6 +59,11 @@ class PavilionEquipment:
     kratownica: bool = False
     fibo: bool = False
     boazeria: bool = False
+    # Niezależne dodatki do WC/łazienki (dowolny wariant), osobna pula mocy —
+    # nie mylić z `fibo`/`boazeria` powyżej (brygada FIBO/boazeria, ściany pawilonu).
+    wc_addon_fibo: bool = False
+    wc_addon_plytki: bool = False
+    wc_addon_boazeria: bool = False
     stolarka_nst: bool = False
     zaluzje_fasadowe: bool = False
     rolety: bool = False
@@ -120,17 +125,22 @@ def calculate_hours(equipment: PavilionEquipment, op_hours: dict[str, Decimal] |
     else:
         if equipment.toaleta:
             key = equipment.toaleta.strip().lower()
-            custom_code = CUSTOM_BATHROOM_CODES.get(key)
-            if custom_code:
-                custom_bathroom += _op_hours(op_hours, custom_code, warnings)
+            code = HYDRAULIC_CODES.get(("toaleta", key))
+            if code:
+                hydraulic += _op_hours(op_hours, code, warnings)
             else:
-                code = HYDRAULIC_CODES.get(("toaleta", key))
-                if code:
-                    hydraulic += _op_hours(op_hours, code, warnings)
-                else:
-                    warnings.append(f"Nierozpoznany wariant toalety: '{equipment.toaleta}'")
+                warnings.append(f"Nierozpoznany wariant toalety: '{equipment.toaleta}'")
         if equipment.prysznic:
             hydraulic += _op_hours(op_hours, PRYSZNIC_CODE, warnings)
+
+    # Dodatki WC/łazienki — niezależne od wariantu (Toaleta lub Łazienka) i od
+    # siebie nawzajem; mogą wystąpić w dowolnej kombinacji, sumują się.
+    if equipment.wc_addon_fibo:
+        custom_bathroom += _op_hours(op_hours, WC_ADDON_FIBO_CODE, warnings)
+    if equipment.wc_addon_plytki:
+        custom_bathroom += _op_hours(op_hours, WC_ADDON_PLYTKI_CODE, warnings)
+    if equipment.wc_addon_boazeria:
+        custom_bathroom += _op_hours(op_hours, WC_ADDON_BOAZERIA_CODE, warnings)
 
     if equipment.pelna_statyka:
         welding += _op_hours(op_hours, STATYKA_CODE, warnings)

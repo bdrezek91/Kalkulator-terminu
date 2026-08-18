@@ -4,12 +4,6 @@ from django.core.exceptions import ValidationError
 
 KUCHNIA_CHOICES = [("", "brak"), ("Standard", "Standard"), ("Lux", "Lux")]
 WARIANT_CHOICES = [("", "brak"), ("Standard", "Standard"), ("Komfort", "Komfort"), ("Premium", "Premium")]
-# Toaleta ma dodatkowo niestandardowe warianty WC potwierdzone z produkcją (sierpień 2026).
-TOALETA_CHOICES = WARIANT_CHOICES + [
-    ("Fibo", "WC Fibo"),
-    ("Premium płytki", "WC Premium płytki"),
-    ("Premium + boazeria", "WC Premium + boazeria"),
-]
 
 
 class CalculatorForm(forms.Form):
@@ -18,7 +12,7 @@ class CalculatorForm(forms.Form):
         widget=forms.Select(attrs={"class": "form-select"}),
     )
     toaleta = forms.ChoiceField(
-        choices=TOALETA_CHOICES, required=False, label="Toaleta",
+        choices=WARIANT_CHOICES, required=False, label="Toaleta",
         widget=forms.Select(attrs={"class": "form-select", "id": "id_toaleta"}),
     )
     lazienka = forms.ChoiceField(
@@ -28,6 +22,18 @@ class CalculatorForm(forms.Form):
     prysznic = forms.BooleanField(
         required=False, label="Samodzielny prysznic",
         widget=forms.CheckboxInput(attrs={"class": "form-check-input", "id": "id_prysznic"}),
+    )
+    wc_addon_fibo = forms.BooleanField(
+        required=False, label="Fibo (dodatkowo)",
+        widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
+    )
+    wc_addon_plytki = forms.BooleanField(
+        required=False, label="Płytki (dodatkowo)",
+        widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
+    )
+    wc_addon_boazeria = forms.BooleanField(
+        required=False, label="Boazeria WC/łazienki (dodatkowo)",
+        widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
     )
     pelna_statyka = forms.BooleanField(
         required=False, label="Pełna konstrukcja / statyka",

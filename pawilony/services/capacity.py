@@ -92,13 +92,17 @@ class EquipmentBreakdown:
     custom_count: int = 0
     kuchnia: dict[str, int] = field(default_factory=dict)
     toaleta: dict[str, int] = field(default_factory=dict)
-    toaleta_niestandardowa: dict[str, int] = field(default_factory=dict)
     lazienka: dict[str, int] = field(default_factory=dict)
     prysznic_count: int = 0
     statyka_count: int = 0
     kratownica_count: int = 0
     fibo_count: int = 0
     boazeria_count: int = 0
+    # Niezależne dodatki WC/łazienki (własna pula mocy) — patrz uwaga w
+    # compute_equipment_breakdown o braku kolumn źródłowych w Optimie.
+    wc_addon_fibo_count: int = 0
+    wc_addon_plytki_count: int = 0
+    wc_addon_boazeria_count: int = 0
 
 
 def _value_counts(queryset, field_name: str) -> dict[str, int]:
@@ -120,26 +124,22 @@ def compute_equipment_breakdown(batch: ImportBatch | None) -> EquipmentBreakdown
     # ma łazienki (łazienka jest kompletem) — podsumowanie ma odzwierciedlać
     # realne obciążenie, więc pomijamy je tam, gdzie łazienka je zastępuje.
     no_lazienka = counted.filter(lazienka="")
-    # Niestandardowe warianty WC mają własną pulę mocy — liczymy je osobno
-    # od standardowej Toalety (Standard/Komfort/Premium).
-    standardowa_toaleta = no_lazienka.exclude(
-        toaleta__in=["Fibo", "Premium płytki", "Premium + boazeria"]
-    )
-    niestandardowa_toaleta = no_lazienka.filter(
-        toaleta__in=["Fibo", "Premium płytki", "Premium + boazeria"]
-    )
 
     return EquipmentBreakdown(
         total_counted=counted.count(),
         standard_count=counted.filter(is_custom=False).count(),
         custom_count=counted.filter(is_custom=True).count(),
         kuchnia=_value_counts(counted, "kuchnia"),
-        toaleta=_value_counts(standardowa_toaleta, "toaleta"),
-        toaleta_niestandardowa=_value_counts(niestandardowa_toaleta, "toaleta"),
+        toaleta=_value_counts(no_lazienka, "toaleta"),
         lazienka=_value_counts(counted, "lazienka"),
         prysznic_count=no_lazienka.filter(prysznic=True).count(),
         statyka_count=counted.filter(pelna_statyka=True).count(),
         kratownica_count=counted.filter(kratownica=True).count(),
         fibo_count=counted.filter(fibo=True).count(),
         boazeria_count=counted.filter(boazeria=True).count(),
+        # Eksport Optima nie ma jeszcze osobnych kolumn dla tych dodatków —
+        # zawsze 0, dopóki firma nie doda odpowiednich atrybutów do eksportu.
+        wc_addon_fibo_count=counted.filter(wc_fibo=True).count(),
+        wc_addon_plytki_count=counted.filter(wc_plytki=True).count(),
+        wc_addon_boazeria_count=counted.filter(wc_boazeria=True).count(),
     )

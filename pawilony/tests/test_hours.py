@@ -19,13 +19,34 @@ def test_toaleta_variants(operation_times):
     assert calculate_hours(PavilionEquipment(toaleta="Premium")).hydraulic_hours == Decimal("10")
 
 
-def test_toaleta_custom_wc_variants(operation_times):
-    # Niestandardowe warianty WC mają własną pulę mocy — liczą się jako
-    # custom_bathroom_hours, nie hydraulic_hours.
-    assert calculate_hours(PavilionEquipment(toaleta="Fibo")).custom_bathroom_hours == Decimal("80")
-    assert calculate_hours(PavilionEquipment(toaleta="Fibo")).hydraulic_hours == Decimal("0")
-    assert calculate_hours(PavilionEquipment(toaleta="Premium płytki")).custom_bathroom_hours == Decimal("100")
-    assert calculate_hours(PavilionEquipment(toaleta="Premium + boazeria")).custom_bathroom_hours == Decimal("150")
+def test_wc_addons_are_independent_of_toaleta_variant(operation_times):
+    # Dodatki WC/łazienki mają własną pulę mocy (custom_bathroom_hours) i
+    # doliczają się NIEZALEŻNIE od wybranego wariantu Toalety/Łazienki.
+    result = calculate_hours(PavilionEquipment(toaleta="Standard", wc_addon_fibo=True))
+    assert result.hydraulic_hours == Decimal("7")
+    assert result.custom_bathroom_hours == Decimal("80")
+
+
+def test_wc_addons_combine_with_each_other(operation_times):
+    # Można łączyć dowolną kombinację dodatków — godziny się sumują.
+    result = calculate_hours(
+        PavilionEquipment(wc_addon_fibo=True, wc_addon_plytki=True, wc_addon_boazeria=True)
+    )
+    assert result.custom_bathroom_hours == Decimal("80") + Decimal("100") + Decimal("150")
+
+
+def test_wc_addon_works_with_lazienka_too(operation_times):
+    # Dodatki działają zarówno przy Toalecie, jak i przy Łazience.
+    result = calculate_hours(PavilionEquipment(lazienka="Premium", wc_addon_plytki=True))
+    assert result.hydraulic_hours == Decimal("10")
+    assert result.custom_bathroom_hours == Decimal("100")
+
+
+def test_wc_addon_without_any_toaleta_or_lazienka(operation_times):
+    # Dodatek sam w sobie, bez wybranej toalety/łazienki, wciąż się liczy.
+    result = calculate_hours(PavilionEquipment(wc_addon_boazeria=True))
+    assert result.hydraulic_hours == Decimal("0")
+    assert result.custom_bathroom_hours == Decimal("150")
 
 
 def test_lazienka_replaces_toaleta_and_prysznic(operation_times):

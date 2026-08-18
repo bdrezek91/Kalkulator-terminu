@@ -22,11 +22,12 @@ OPERATION_TIMES = [
     ("toaleta_standard", "Toaleta Standard", WorkCenter.Code.HYDRAULIC, "7", True),
     ("toaleta_komfort", "Toaleta Komfort", WorkCenter.Code.HYDRAULIC, "12", True),
     ("toaleta_premium", "Toaleta Premium", WorkCenter.Code.HYDRAULIC, "10", True),
-    # Niestandardowe warianty WC potwierdzone z produkcją (korespondencja Dampol/DIT, sierpień 2026).
-    # Mają WŁASNĄ pulę mocy (CUSTOM_BATHROOM), osobną od standardowej hydrauliki.
-    ("toaleta_fibo", "WC Fibo", WorkCenter.Code.CUSTOM_BATHROOM, "80", True),
-    ("toaleta_premium_plytki", "WC Premium płytki", WorkCenter.Code.CUSTOM_BATHROOM, "100", True),
-    ("toaleta_premium_boazeria", "WC Premium + boazeria", WorkCenter.Code.CUSTOM_BATHROOM, "150", True),
+    # Niezależne, łączalne dodatki do WC/łazienki (dowolny wariant) potwierdzone
+    # z produkcją (korespondencja Dampol/DIT, sierpień 2026). Mają WŁASNĄ pulę
+    # mocy (CUSTOM_BATHROOM), osobną od standardowej hydrauliki.
+    ("wc_addon_fibo", "WC/łazienka: Fibo (dodatkowo)", WorkCenter.Code.CUSTOM_BATHROOM, "80", True),
+    ("wc_addon_plytki", "WC/łazienka: Płytki (dodatkowo)", WorkCenter.Code.CUSTOM_BATHROOM, "100", True),
+    ("wc_addon_boazeria", "WC/łazienka: Boazeria (dodatkowo)", WorkCenter.Code.CUSTOM_BATHROOM, "150", True),
     ("lazienka_standard", "Łazienka Standard", WorkCenter.Code.HYDRAULIC, "7", True),
     ("lazienka_komfort", "Łazienka Komfort", WorkCenter.Code.HYDRAULIC, "10", True),
     ("lazienka_premium", "Łazienka Premium", WorkCenter.Code.HYDRAULIC, "10", True),
