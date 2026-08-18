@@ -38,19 +38,21 @@ def test_reference_file_row_and_active_counts(operation_times):
     assert exact_active_status_rows == 504
 
     # Wiersze z mieszanym statusem aktywny+zakończony trafiają do konfliktów,
-    # a nie do aktywnych — w tym pliku jest ich 7. Dodatkowo 14 wierszy ma
-    # jednocześnie "Pełna konstrukcja/statyka" i "Kratownica" — te dwie opcje
-    # wykluczają się biznesowo, więc też trafiają do konfliktów (reguła
-    # dodana po korekcie z sierpnia 2026, patrz seed_defaults/migracje).
-    assert report.conflict_count == 7 + 14
+    # a nie do aktywnych — w tym pliku jest ich 7. Dodatkowo 6 wierszy o AKTYWNYM
+    # statusie ma jednocześnie "Pełna konstrukcja/statyka" i "Kratownica" — te
+    # dwie opcje wykluczają się biznesowo, więc też trafiają do konfliktów
+    # (reguła dodana po korekcie z sierpnia 2026, patrz seed_defaults/migracje).
+    # Ta sama kombinacja na wierszach o statusie NIEaktywnym (już wysłane/odebrane)
+    # jest celowo pomijana — takie wiersze i tak nigdy nie trafiłyby do backlogu,
+    # więc nie ma sensu zaśmiecać nimi listy konfliktów wymagających reakcji.
+    assert report.conflict_count == 7 + 6
 
     # 431 z pierwotnej analizy nie uwzględniało rozpoznawania modułów bez
     # nawiasów (np. "... MODUŁ 1" na końcu nazwy, bez otaczających nawiasów),
     # które nasz parser poprawnie rozpoznaje zamiast zgłaszać jako konflikt —
     # to dawałoby 433. Po dodaniu reguły wykluczającej pełną konstrukcję i
-    # kratownicę tylko 3 z tych 14 nowych konfliktów pokrywały się z wcześniej
-    # liczonymi wierszami (pozostałe były już wykluczone z innych powodów,
-    # np. moduł 2+), więc wynik referencyjny to 433 - 3 = 430.
+    # kratownicę (tylko dla aktywnych statusów) 3 z tych nowych konfliktów
+    # pokrywały się z wcześniej liczonymi wierszami, więc wynik to 433 - 3 = 430.
     counted = [r for r in records if r["is_counted"]]
     assert len(counted) == 430
 

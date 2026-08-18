@@ -165,6 +165,16 @@ def test_statyka_and_kratownica_together_is_conflict(operation_times):
     assert report.conflict_count == 1
 
 
+def test_statyka_and_kratownica_together_ignored_for_inactive_status(operation_times):
+    # Pawilon, który i tak nigdy nie trafiłby do backlogu (status zakończony),
+    # nie powinien zaśmiecać listy konfliktów tą regułą.
+    rows = [_make_row(kod="X1", status="Wysłany do klienta", statyka="Tak", kratownica="Tak")]
+    report, records = analyze_workbook(_build_workbook(rows))
+    assert records[0]["status_classification"] == "ENDED"
+    assert records[0]["is_counted"] is False
+    assert report.conflict_count == 0
+
+
 def test_fibo_and_boazeria_sum_in_shared_brigade(operation_times):
     header = HEADER + ["FIBO", "BOAZERIA"]
     wb = openpyxl.Workbook()

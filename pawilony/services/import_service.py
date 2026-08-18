@@ -179,7 +179,10 @@ def analyze_workbook(file_obj) -> tuple[ImportReport, list[dict]]:
                 warnings.append(warn)
                 report.unrecognized_values.append({"row": row_number, "kod": kod, "pole": "logiczne", "wartosc": warn})
 
-        if pelna_statyka_bool and kratownica_bool:
+        if pelna_statyka_bool and kratownica_bool and status_result.classification == "ACTIVE":
+            # Sprawdzamy to tylko dla aktywnych statusów (Logistyka/Produkcja Zabrze/
+            # Produkcja Czekanów) — pawilony o innych statusach (wysłane, odebrane...)
+            # nigdy nie trafiłyby do backlogu, więc nie ma sensu zgłaszać tu konfliktu.
             conflict_reasons.append(
                 "Pełna konstrukcja/statyka i kratownica nie mogą wystąpić jednocześnie."
             )
