@@ -41,10 +41,19 @@ services:
       timeout: 10s
       retries: 3
       start_period: 20s
+    networks:
+      - default
+      - multiplekser-shared
 
 networks:
   default:
     name: kalkulator_default
+  # Siec dzielona ze stosem Multipleksera na tym samym VPS, zeby jego Caddy mogl
+  # reverse-proxowac do tego kontenera po nazwie `kalkulator-web` (patrz Caddyfile
+  # Multipleksera, blok /kalkulator-terminu). Utworzona recznie:
+  #   docker network create multiplekser-shared
+  multiplekser-shared:
+    external: true
 
 volumes:
   postgres_data:
