@@ -1,0 +1,160 @@
+{% extends "pawilony/base.html" %}
+{% block title %}Obciążenie kolejki — Kalkulator terminu pawilonu{% endblock %}
+{% block content %}
+<div class="card mb-4">
+    <div class="card-body">
+        <h1 class="h4 mb-2">Obciążenie kolejki</h1>
+        <p class="text-muted mb-3">
+            Zagregowane podsumowanie tego, z czego wynika obecnie wyznaczany termin —
+            bez numerów projektów ani szczegółów pojedynczych pawilonów.
+        </p>
+
+        {% if no_active_import %}
+            <div class="alert alert-warning">Brak zatwierdzonego importu — podsumowanie oparte wyłącznie o ręczne korekty backlogu.</div>
+        {% else %}
+            <p class="small text-muted mb-1">
+                {% if last_import_at %}Dane aktualne na: {{ last_import_at|date:"d.m.Y H:i" }}{% endif %}
+            </p>
+        {% endif %}
+        {% if data_is_stale and not no_active_import %}
+        <div class="alert alert-warning small">
+            Uwaga: dane mogą być nieaktualne{% if stale_threshold_hours %} (starsze niż {{ stale_threshold_hours }} godz.){% endif %}.
+        </div>
+        {% endif %}
+        {% if fibo_wood_may_be_understated %}
+        <div class="alert alert-warning small">
+            Uwaga: eksport nie zawiera jeszcze kolumn FIBO/boazerii i nie wprowadzono ręcznej korekty —
+            obciążenie tej brygady może być zaniżone.
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card"><div class="card-body">
+            <div class="text-muted small">Aktywne pawilony w kolejce</div>
+            <div class="h3">{{ breakdown.total_counted }}</div>
+        </div></div>
+    </div>
+    <div class="col-md-4">
+        <div class="card"><div class="card-body">
+            <div class="text-muted small">Standardowe (bez wyposażenia specjalistycznego)</div>
+            <div class="h3">{{ breakdown.standard_count }}</div>
+        </div></div>
+    </div>
+    <div class="col-md-4">
+        <div class="card"><div class="card-body">
+            <div class="text-muted small">Niestandardowe (obciążają co najmniej jedną brygadę)</div>
+            <div class="h3">{{ breakdown.custom_count }}</div>
+        </div></div>
+    </div>
+</div>
+
+{% if config %}
+<div class="card mb-4">
+    <div class="card-body">
+        <h2 class="h6">Produkcja ogólna</h2>
+        <p class="small text-muted mb-1">
+            Kolejka zamówień ogranicza termin nawet dla pawilonu bez żadnego wyposażenia
+            specjalistycznego — sama budowa też stoi w kolejce za innymi zamówieniami.
+        </p>
+        <p class="mb-0">
+            <strong>{{ breakdown.total_counted }}</strong> pawilonów w kolejce,
+            moc <strong>{{ config.effective_general_capacity }}</strong> pawilonu/tydzień
+            (po buforze {{ config.safety_buffer_percent }}%).
+        </p>
+    </div>
+</div>
+{% endif %}
+
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h2 class="h6">Hydraulika</h2>
+                <table class="table table-sm mb-2">
+                    <tbody>
+                        <tr><th colspan="2" class="small text-muted">Kuchnia</th></tr>
+                        {% for wariant, n in breakdown.kuchnia.items %}
+                        <tr><td>{{ wariant }}</td><td class="text-end">{{ n }}</td></tr>
+                        {% empty %}
+                        <tr><td colspan="2" class="text-muted">brak</td></tr>
+                        {% endfor %}
+                        <tr><th colspan="2" class="small text-muted pt-3">Łazienka (komplet)</th></tr>
+                        {% for wariant, n in breakdown.lazienka.items %}
+                        <tr><td>{{ wariant }}</td><td class="text-end">{{ n }}</td></tr>
+                        {% empty %}
+                        <tr><td colspan="2" class="text-muted">brak</td></tr>
+                        {% endfor %}
+                        <tr><th colspan="2" class="small text-muted pt-3">Toaleta (bez łazienki)</th></tr>
+                        {% for wariant, n in breakdown.toaleta.items %}
+                        <tr><td>{{ wariant }}</td><td class="text-end">{{ n }}</td></tr>
+                        {% empty %}
+                        <tr><td colspan="2" class="text-muted">brak</td></tr>
+                        {% endfor %}
+                        <tr><td>Samodzielny prysznic (bez łazienki)</td><td class="text-end">{{ breakdown.prysznic_count }}</td></tr>
+                    </tbody>
+                </table>
+                <p class="mb-0"><strong>Suma godzin hydraulików w kolejce:</strong> {{ backlog.hydraulic_hours }} h</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h2 class="h6">Spawacze</h2>
+                <table class="table table-sm mb-2">
+                    <tbody>
+                        <tr><td>Pełna konstrukcja / statyka</td><td class="text-end">{{ breakdown.statyka_count }}</td></tr>
+                        <tr><td>Kratownica</td><td class="text-end">{{ breakdown.kratownica_count }}</td></tr>
+                    </tbody>
+                </table>
+                <p class="mb-0"><strong>Suma godzin spawaczy w kolejce:</strong> {{ backlog.welding_hours }} h</p>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-body">
+                <h2 class="h6">FIBO / boazeria</h2>
+                <table class="table table-sm mb-2">
+                    <tbody>
+                        <tr><td>FIBO</td><td class="text-end">{{ breakdown.fibo_count }}</td></tr>
+                        <tr><td>Boazeria</td><td class="text-end">{{ breakdown.boazeria_count }}</td></tr>
+                    </tbody>
+                </table>
+                <p class="mb-0"><strong>Suma godzin brygady FIBO/boazeria w kolejce:</strong> {{ backlog.fibo_wood_hours }} h</p>
+                {% if manual_totals.FIBO_WOOD %}
+                <p class="small text-muted mb-0">w tym {{ manual_totals.FIBO_WOOD }} h z ręcznej korekty administratora</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-body">
+                <h2 class="h6">Niestandardowe łazienki</h2>
+                <p class="small text-muted mb-2">
+                    Osobna pula mocy, niezależna od standardowej hydrauliki — dodatek Boazeria
+                    do dowolnego wariantu Toalety/Łazienki (Fibo/Płytki są już wliczone
+                    w warianty Komfort/Premium standardowej hydrauliki).
+                </p>
+                <table class="table table-sm mb-2">
+                    <tbody>
+                        <tr><td>Boazeria (WC/łazienka)</td><td class="text-end">{{ breakdown.wc_addon_boazeria_count }}</td></tr>
+                    </tbody>
+                </table>
+                <p class="mb-0"><strong>Suma godzin w kolejce:</strong> {{ backlog.custom_bathroom_hours }} h</p>
+                {% if manual_totals.CUSTOM_BATHROOM %}
+                <p class="small text-muted mb-0">w tym {{ manual_totals.CUSTOM_BATHROOM }} h z ręcznej korekty administratora</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<p class="small text-muted">
+    Termin dla nowego pawilonu to maksimum wymaganych tygodni po produkcji ogólnej
+    oraz wszystkich brygadach wykończeniowych pokazanych powyżej.
+</p>
+{% endblock %}

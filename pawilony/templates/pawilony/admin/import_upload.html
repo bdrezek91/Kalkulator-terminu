@@ -1,0 +1,26 @@
+{% extends "pawilony/base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h1 class="h5 mb-3">Nowy import XLSX</h1>
+                <p class="small text-muted">
+                    Wybierz pełny eksport „Lista zasobów” z Comarch ERP Optima. Import jest pełną migawką —
+                    po zatwierdzeniu zastąpi poprzednią aktywną kolejkę (poprzednia migawka pozostaje zachowana do audytu).
+                </p>
+                {% if form.errors %}
+                    <div class="alert alert-danger">{{ form.errors }}</div>
+                {% endif %}
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        {{ form.file }}
+                    </div>
+                    <button type="submit" class="btn btn-primary">Wczytaj i zwaliduj</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

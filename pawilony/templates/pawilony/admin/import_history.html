@@ -1,0 +1,29 @@
+{% extends "pawilony/base.html" %}
+{% block content %}
+<h1 class="h5 mb-3">Historia importów</h1>
+<table class="table table-sm table-striped">
+    <thead><tr><th>Plik</th><th>Wgrał</th><th>Data</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+    {% for b in batches %}
+        <tr>
+            <td>{{ b.original_filename }}</td>
+            <td>{{ b.uploaded_by }}</td>
+            <td>{{ b.uploaded_at|date:"d.m.Y H:i" }}</td>
+            <td>{{ b.get_status_display }}{% if b.is_active_snapshot %} — <strong>aktywna</strong>{% endif %}</td>
+            <td><a href="{% url 'pawilony:import_preview' pk=b.pk %}">szczegóły</a></td>
+        </tr>
+    {% empty %}
+        <tr><td colspan="5" class="text-muted">Brak importów.</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% if is_paginated %}
+<nav>
+    <ul class="pagination">
+        {% if page_obj.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Poprzednia</a></li>{% endif %}
+        <li class="page-item disabled"><span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
+        {% if page_obj.has_next %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Następna</a></li>{% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}
