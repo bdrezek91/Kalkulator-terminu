@@ -21,12 +21,6 @@
             Uwaga: dane mogą być nieaktualne{% if stale_threshold_hours %} (starsze niż {{ stale_threshold_hours }} godz.){% endif %}.
         </div>
         {% endif %}
-        {% if fibo_wood_may_be_understated %}
-        <div class="alert alert-warning small">
-            Uwaga: eksport nie zawiera jeszcze kolumn FIBO/boazerii i nie wprowadzono ręcznej korekty —
-            obciążenie tej brygady może być zaniżone.
-        </div>
-        {% endif %}
     </div>
 </div>
 
@@ -119,16 +113,9 @@
             <div class="card-body">
                 <h2 class="h6">FIBO / boazeria</h2>
                 <p class="small text-muted mb-2">
-                    Obejmuje samodzielne pozycje FIBO/Boazeria poniżej ORAZ 60% godzin
-                    Fibo/Płytki wliczonych w warianty Komfort/Premium Toalety/Łazienki
-                    (pozostałe 40% liczy się do hydrauliki).
+                    60% godzin Fibo/Płytki wliczonych w warianty Komfort/Premium
+                    Toalety/Łazienki (pozostałe 40% liczy się do hydrauliki).
                 </p>
-                <table class="table table-sm mb-2">
-                    <tbody>
-                        <tr><td>FIBO</td><td class="text-end">{{ breakdown.fibo_count }}</td></tr>
-                        <tr><td>Boazeria</td><td class="text-end">{{ breakdown.boazeria_count }}</td></tr>
-                    </tbody>
-                </table>
                 <p class="mb-0"><strong>Suma godzin brygady FIBO/boazeria w kolejce:</strong> {{ backlog.fibo_wood_hours }} h</p>
                 {% if manual_totals.FIBO_WOOD %}
                 <p class="small text-muted mb-0">w tym {{ manual_totals.FIBO_WOOD }} h z ręcznej korekty administratora</p>

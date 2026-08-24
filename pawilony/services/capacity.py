@@ -67,14 +67,6 @@ def compute_backlog_totals(batch: ImportBatch | None) -> BacklogTotals:
     )
 
 
-def fibo_wood_columns_present(batch: ImportBatch | None) -> tuple[bool, bool]:
-    """Zwraca (czy_kolumna_FIBO_była_w_pliku, czy_kolumna_BOAZERIA_była_w_pliku)."""
-    if batch is None:
-        return False, False
-    report = batch.report or {}
-    return bool(report.get("fibo_column_present")), bool(report.get("boazeria_column_present"))
-
-
 @dataclass
 class EquipmentBreakdown:
     """
@@ -92,8 +84,6 @@ class EquipmentBreakdown:
     prysznic_count: int = 0
     statyka_count: int = 0
     kratownica_count: int = 0
-    fibo_count: int = 0
-    boazeria_count: int = 0
 
 
 def _value_counts(queryset, field_name: str) -> dict[str, int]:
@@ -126,6 +116,4 @@ def compute_equipment_breakdown(batch: ImportBatch | None) -> EquipmentBreakdown
         prysznic_count=no_lazienka.filter(prysznic=True).count(),
         statyka_count=counted.filter(pelna_statyka=True).count(),
         kratownica_count=counted.filter(kratownica=True).count(),
-        fibo_count=counted.filter(fibo=True).count(),
-        boazeria_count=counted.filter(boazeria=True).count(),
     )

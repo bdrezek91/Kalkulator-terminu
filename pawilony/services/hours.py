@@ -36,8 +36,6 @@ FIBO_SPLIT_CODES = {
 PRYSZNIC_CODE = "prysznic_samodzielny"
 STATYKA_CODE = "statyka_pelna"
 KRATOWNICA_CODE = "kratownica"
-FIBO_CODE = "fibo"
-BOAZERIA_CODE = "boazeria"
 INFO_CODES = {
     "stolarka_nst": "stolarka_nst",
     "zaluzje_fasadowe": "zaluzje_fasadowe",
@@ -73,8 +71,6 @@ class PavilionEquipment:
     # własnej konstrukcji spawanej. Pozostałe brygady (hydraulika, FIBO/boazeria)
     # są liczone per pawilon/wariant, niezależnie od liczby modułów.
     module_count: int = 1
-    fibo: bool = False
-    boazeria: bool = False
     stolarka_nst: bool = False
     zaluzje_fasadowe: bool = False
     rolety: bool = False
@@ -154,11 +150,6 @@ def calculate_hours(equipment: PavilionEquipment, op_hours: dict[str, Decimal] |
         welding += _op_hours(op_hours, STATYKA_CODE, warnings) * module_count
     if equipment.kratownica:
         welding += _op_hours(op_hours, KRATOWNICA_CODE, warnings) * module_count
-
-    if equipment.fibo:
-        fibo_wood += _op_hours(op_hours, FIBO_CODE, warnings)
-    if equipment.boazeria:
-        fibo_wood += _op_hours(op_hours, BOAZERIA_CODE, warnings)
 
     if equipment.stolarka_nst:
         informational += _op_hours(op_hours, INFO_CODES["stolarka_nst"], warnings)

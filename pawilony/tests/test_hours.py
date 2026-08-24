@@ -84,20 +84,15 @@ def test_statyka_sums_with_kratownica(operation_times):
     assert result.welding_hours == Decimal("12") + Decimal("4")
 
 
-def test_fibo_sums_with_boazeria(operation_times):
-    result = calculate_hours(PavilionEquipment(fibo=True, boazeria=True))
-    assert result.fibo_wood_hours == Decimal("50") + Decimal("70")
-
-
 def test_brigades_are_independent_not_summed_together(operation_times):
     result = calculate_hours(
-        PavilionEquipment(kuchnia="Lux", pelna_statyka=True, fibo=True)
+        PavilionEquipment(kuchnia="Lux", pelna_statyka=True, toaleta="Komfort")
     )
-    assert result.hydraulic_hours == Decimal("10")
+    assert result.hydraulic_hours == Decimal("10") + Decimal("18")
     assert result.welding_hours == Decimal("12")
-    assert result.fibo_wood_hours == Decimal("50")
+    assert result.fibo_wood_hours == Decimal("27")
     # brygady nie sumują się w jeden ciąg — sprawdzamy, że są przechowywane osobno
-    assert result.hydraulic_hours + result.welding_hours + result.fibo_wood_hours == Decimal("72")
+    assert result.hydraulic_hours + result.welding_hours + result.fibo_wood_hours == Decimal("67")
 
 
 def test_informational_fields_do_not_affect_brigade_hours(operation_times):
@@ -132,9 +127,9 @@ def test_kratownica_multiplied_by_module_count(operation_times):
 
 
 def test_module_count_does_not_affect_other_brigades(operation_times):
-    result = calculate_hours(PavilionEquipment(kuchnia="Lux", fibo=True, module_count=3))
-    assert result.hydraulic_hours == Decimal("10")
-    assert result.fibo_wood_hours == Decimal("50")
+    result = calculate_hours(PavilionEquipment(kuchnia="Lux", toaleta="Komfort", module_count=3))
+    assert result.hydraulic_hours == Decimal("10") + Decimal("18")
+    assert result.fibo_wood_hours == Decimal("27")
 
 
 def test_default_module_count_is_one(operation_times):

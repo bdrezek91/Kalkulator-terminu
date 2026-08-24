@@ -62,8 +62,6 @@ class ImportReport:
     warnings: list[dict] = field(default_factory=list)
     missing_columns: list[str] = field(default_factory=list)
     unrecognized_headers: list[str] = field(default_factory=list)
-    fibo_column_present: bool = False
-    boazeria_column_present: bool = False
     sheet_name: str = SHEET_NAME
     counted_hydraulic_hours: str = "0"
     counted_welding_hours: str = "0"
@@ -111,8 +109,6 @@ def analyze_workbook(
     report = ImportReport(
         missing_columns=missing_required,
         unrecognized_headers=unrecognized_headers,
-        fibo_column_present="fibo" in field_map,
-        boazeria_column_present="boazeria" in field_map,
     )
 
     if missing_required:
@@ -206,12 +202,8 @@ def analyze_workbook(
         pelna_statyka_bool, statyka_warn = normalize_bool(raw_values.get("pelna_statyka"))
         kratownica_bool, kratownica_warn = normalize_bool(raw_values.get("kratownica"))
         prysznic_bool, prysznic_warn = normalize_bool(raw_values.get("prysznic"))
-        fibo_bool, fibo_warn = normalize_bool(raw_values.get("fibo")) if "fibo" in field_map else (False, None)
-        boazeria_bool, boazeria_warn = (
-            normalize_bool(raw_values.get("boazeria")) if "boazeria" in field_map else (False, None)
-        )
 
-        for warn in (statyka_warn, kratownica_warn, prysznic_warn, fibo_warn, boazeria_warn):
+        for warn in (statyka_warn, kratownica_warn, prysznic_warn):
             if warn:
                 warnings.append(warn)
                 report.unrecognized_values.append({"row": row_number, "kod": kod, "pole": "logiczne", "wartosc": warn})
@@ -296,8 +288,6 @@ def analyze_workbook(
             prysznic=prysznic_bool,
             pelna_statyka=pelna_statyka_bool,
             kratownica=kratownica_bool,
-            fibo=fibo_bool,
-            boazeria=boazeria_bool,
             module_count=row_module_count,
             stolarka_nst=bool(read_attr("stolarka_nst").value),
             zaluzje_fasadowe=bool(read_attr("zaluzje_fasadowe").value),
@@ -365,8 +355,6 @@ def analyze_workbook(
                 "prysznic": prysznic_bool,
                 "pelna_statyka": pelna_statyka_bool,
                 "kratownica": kratownica_bool,
-                "fibo": fibo_bool,
-                "boazeria": boazeria_bool,
                 "stolarka_nst_raw": str(raw_values.get("stolarka_nst") or ""),
                 "zaluzje_fasadowe_raw": str(raw_values.get("zaluzje_fasadowe") or ""),
                 "rolety_raw": str(raw_values.get("rolety") or ""),
@@ -422,8 +410,6 @@ def commit_batch(batch: ImportBatch, records: list[dict], user) -> ImportBatch:
             prysznic=r["prysznic"],
             pelna_statyka=r["pelna_statyka"],
             kratownica=r["kratownica"],
-            fibo=r["fibo"],
-            boazeria=r["boazeria"],
             stolarka_nst_raw=r["stolarka_nst_raw"][:50],
             zaluzje_fasadowe_raw=r["zaluzje_fasadowe_raw"][:50],
             rolety_raw=r["rolety_raw"][:50],

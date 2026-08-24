@@ -49,15 +49,6 @@
 {% if report.missing_columns %}
 <div class="alert alert-danger">Brak wymaganych kolumn: {{ report.missing_columns|join:", " }}</div>
 {% endif %}
-{% if not report.fibo_column_present or not report.boazeria_column_present %}
-<div class="alert alert-warning">
-    Eksport nie zawiera kolumn:
-    {% if not report.fibo_column_present %}FIBO{% endif %}
-    {% if not report.fibo_column_present and not report.boazeria_column_present %} i {% endif %}
-    {% if not report.boazeria_column_present %}BOAZERIA{% endif %}
-    — obciążenie tej brygady może być zaniżone bez ręcznej korekty w konfiguracji.
-</div>
-{% endif %}
 {% if report.unrecognized_headers %}
 <div class="alert alert-secondary small">Nierozpoznane nagłówki (zignorowane): {{ report.unrecognized_headers|join:", " }}</div>
 {% endif %}

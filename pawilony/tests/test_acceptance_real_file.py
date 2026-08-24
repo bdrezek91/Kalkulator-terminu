@@ -63,10 +63,6 @@ def test_reference_file_row_and_active_counts(operation_times):
     counted = [r for r in records if r["is_counted"]]
     assert len(counted) == 353
 
-    # plik źródłowy nie zawiera jeszcze kolumn FIBO/BOAZERIA
-    assert report.fibo_column_present is False
-    assert report.boazeria_column_present is False
-
 
 def test_reference_file_source_not_modified():
     import hashlib

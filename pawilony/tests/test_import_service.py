@@ -242,28 +242,6 @@ def test_statyka_and_kratownica_together_ignored_for_inactive_status(operation_t
     assert report.conflict_count == 0
 
 
-def test_fibo_and_boazeria_sum_in_shared_brigade(operation_times):
-    header = HEADER + ["FIBO", "BOAZERIA"]
-    wb = openpyxl.Workbook()
-    ws = wb.active
-    ws.title = "Lista zasobów"
-    ws.append(header)
-    ws.append(_make_row(kod="X1", status="Logistyka") + ["Tak", "Tak"])
-    buf = io.BytesIO()
-    wb.save(buf)
-    buf.seek(0)
-    report, records = analyze_workbook(buf)
-    assert report.fibo_column_present is True
-    assert report.boazeria_column_present is True
-    assert Decimal(records[0]["fibo_wood_hours"]) == Decimal("50") + Decimal("70")
-
-
-def test_missing_fibo_boazeria_columns_flagged(operation_times, base_rows):
-    report, _ = analyze_workbook(_build_workbook(base_rows))
-    assert report.fibo_column_present is False
-    assert report.boazeria_column_present is False
-
-
 def test_parallel_brigades_recorded_independently(operation_times):
     rows = [_make_row(kod="X1", status="Logistyka", kuchnia="Lux", statyka="Tak")]
     _, records = analyze_workbook(_build_workbook(rows))

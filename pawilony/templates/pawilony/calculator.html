@@ -74,16 +74,6 @@
                         <div class="form-text">Pełna konstrukcja/statyka i kratownica wykluczają się wzajemnie.</div>
                     </div>
 
-                    <h2 class="h6 text-uppercase text-muted mt-4">Wykończenie</h2>
-                    <div class="form-check mb-2">
-                        {{ form.fibo }}
-                        <label class="form-check-label" for="{{ form.fibo.id_for_label }}">{{ form.fibo.label }}</label>
-                    </div>
-                    <div class="form-check mb-3">
-                        {{ form.boazeria }}
-                        <label class="form-check-label" for="{{ form.boazeria.id_for_label }}">{{ form.boazeria.label }}</label>
-                    </div>
-
                     <h2 class="h6 text-uppercase text-muted mt-4">Elementy dodatkowe (informacyjnie)</h2>
                     <div class="form-check mb-2">
                         {{ form.stolarka_nst }}
@@ -157,12 +147,6 @@
                 {% if data_is_stale %}
                 <div class="alert alert-warning small mt-2 mb-1">
                     Uwaga: dane mogą być nieaktualne (starsze niż {{ stale_threshold_hours }} godz.).
-                </div>
-                {% endif %}
-                {% if fibo_wood_may_be_understated %}
-                <div class="alert alert-warning small mt-2 mb-1">
-                    Uwaga: eksport nie zawiera jeszcze kolumn FIBO/boazerii i nie wprowadzono ręcznej korekty —
-                    termin dla brygady FIBO/boazeria może być zaniżony.
                 </div>
                 {% endif %}
             </div>

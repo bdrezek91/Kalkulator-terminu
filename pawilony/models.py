@@ -231,8 +231,6 @@ class PavilionSnapshot(models.Model):
     prysznic = models.BooleanField(default=False)
     pelna_statyka = models.BooleanField(default=False)
     kratownica = models.BooleanField(default=False)
-    fibo = models.BooleanField(default=False)
-    boazeria = models.BooleanField(default=False)
 
     stolarka_nst_raw = models.CharField(max_length=50, blank=True)
     zaluzje_fasadowe_raw = models.CharField(max_length=50, blank=True)

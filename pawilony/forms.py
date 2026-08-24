@@ -42,12 +42,6 @@ class CalculatorForm(forms.Form):
         required=False, min_value=1, initial=1, label="Liczba modułów",
         widget=forms.NumberInput(attrs={"class": "form-control", "style": "max-width: 6rem"}),
     )
-    fibo = forms.BooleanField(
-        required=False, label="FIBO", widget=forms.CheckboxInput(attrs={"class": "form-check-input"})
-    )
-    boazeria = forms.BooleanField(
-        required=False, label="Boazeria", widget=forms.CheckboxInput(attrs={"class": "form-check-input"})
-    )
     stolarka_nst = forms.BooleanField(
         required=False, label="Stolarka niestandardowa", widget=forms.CheckboxInput(attrs={"class": "form-check-input"})
     )

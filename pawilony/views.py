@@ -14,7 +14,6 @@ from pawilony.models import CapacityConfiguration, ImportBatch, ManualBacklogAdj
 from pawilony.services.capacity import (
     compute_backlog_totals,
     compute_equipment_breakdown,
-    fibo_wood_columns_present,
     get_active_configuration,
     get_active_import_batch,
     manual_adjustment_totals,
@@ -81,8 +80,6 @@ class CalculatorView(View):
             pelna_statyka=cleaned.get("pelna_statyka", False),
             kratownica=cleaned.get("kratownica", False),
             module_count=cleaned.get("module_count") or 1,
-            fibo=cleaned.get("fibo", False),
-            boazeria=cleaned.get("boazeria", False),
             stolarka_nst=cleaned.get("stolarka_nst", False),
             zaluzje_fasadowe=cleaned.get("zaluzje_fasadowe", False),
             rolety=cleaned.get("rolety", False),
@@ -92,12 +89,6 @@ class CalculatorView(View):
         active_batch = get_active_import_batch()
         backlog = compute_backlog_totals(active_batch)
         week_result = calculate_earliest_week(backlog, hours_result, config)
-
-        fibo_present, boazeria_present = fibo_wood_columns_present(active_batch)
-        manual_totals = manual_adjustment_totals()
-        fibo_wood_may_be_understated = (
-            not (fibo_present and boazeria_present) and manual_totals["FIBO_WOOD"] == 0
-        )
 
         stale_threshold_hours = config.stale_data_warning_hours
         data_is_stale = True
@@ -133,7 +124,6 @@ class CalculatorView(View):
                 "last_import_at": last_import_at,
                 "data_is_stale": data_is_stale,
                 "stale_threshold_hours": stale_threshold_hours,
-                "fibo_wood_may_be_understated": fibo_wood_may_be_understated,
             }
         )
         return render(request, self.template_name, context)
@@ -153,7 +143,6 @@ class BacklogSummaryView(View):
         backlog = compute_backlog_totals(active_batch)
         breakdown = compute_equipment_breakdown(active_batch)
         manual_totals = manual_adjustment_totals()
-        fibo_present, boazeria_present = fibo_wood_columns_present(active_batch)
 
         try:
             config = get_active_configuration()
@@ -179,8 +168,6 @@ class BacklogSummaryView(View):
             "last_import_at": last_import_at,
             "data_is_stale": data_is_stale,
             "stale_threshold_hours": stale_threshold_hours,
-            "fibo_wood_may_be_understated": not (fibo_present and boazeria_present)
-            and manual_totals["FIBO_WOOD"] == 0,
         }
         return render(request, self.template_name, context)
 

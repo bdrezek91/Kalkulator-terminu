@@ -33,8 +33,6 @@ HEADER_ALIASES: dict[str, list[str]] = {
     "rolety": ["ROLETY"],
     "lazienka": ["LAZIENKA", "ŁAZIENKA"],
     "inne_niestandard": ["INNE NIESTANDARD"],
-    "fibo": ["FIBO"],
-    "boazeria": ["BOAZERIA"],
 }
 
 REQUIRED_FIELDS = ["kod", "nazwa", "typ", "stan_zasobow", "status_proces"]

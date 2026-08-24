@@ -36,8 +36,6 @@ def operation_times(work_centers):
         ("prysznic_samodzielny", "Samodzielny prysznic", WorkCenter.Code.HYDRAULIC, "8", True),
         ("statyka_pelna", "Pełna konstrukcja / statyka", WorkCenter.Code.WELDING, "12", True),
         ("kratownica", "Kratownica", WorkCenter.Code.WELDING, "4", True),
-        ("fibo", "FIBO", WorkCenter.Code.FIBO_WOOD, "50", True),
-        ("boazeria", "Boazeria", WorkCenter.Code.FIBO_WOOD, "70", True),
         ("stolarka_nst", "Stolarka niestandardowa", WorkCenter.Code.HYDRAULIC, "5", False),
         ("zaluzje_fasadowe", "Żaluzje fasadowe", WorkCenter.Code.HYDRAULIC, "5", False),
         ("rolety", "Rolety", WorkCenter.Code.HYDRAULIC, "5", False),
