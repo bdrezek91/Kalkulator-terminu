@@ -8,6 +8,7 @@ Wszystkie wartości wrażliwe i środowiskowe pochodzą z pliku .env
 from pathlib import Path
 
 import environ
+from django.urls import reverse_lazy
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -117,9 +118,12 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-LOGIN_URL = "/admin-panel/login/"
-LOGIN_REDIRECT_URL = "/admin-panel/"
-LOGOUT_REDIRECT_URL = "/"
+# reverse_lazy (nie twarde stringi) — muszą respektować FORCE_SCRIPT_NAME,
+# inaczej po zalogowaniu/wylogowaniu użytkownik trafia poza prefiks ścieżki
+# aplikacji na współdzielonej domenie (patrz uwaga przy FORCE_SCRIPT_NAME wyżej).
+LOGIN_URL = reverse_lazy("pawilony:login")
+LOGIN_REDIRECT_URL = reverse_lazy("pawilony:dashboard")
+LOGOUT_REDIRECT_URL = reverse_lazy("pawilony:calculator")
 
 # --- Bezpieczeństwo uploadu ---
 IMPORT_MAX_UPLOAD_SIZE_MB = env.int("IMPORT_MAX_UPLOAD_SIZE_MB", default=15)
