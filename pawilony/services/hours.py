@@ -20,12 +20,26 @@ HYDRAULIC_CODES = {
     ("lazienka", "komfort"): "lazienka_komfort",
     ("lazienka", "premium"): "lazienka_premium",
 }
+# Godziny Fibo/Płytki wliczone na stałe w warianty Komfort/Premium Toalety
+# i Łazienki (nie są osobnymi dodatkami) są DZIELONE 50/50 między hydraulikę
+# a brygadę FIBO/boazeria — HYDRAULIC_CODES powyżej wskazuje na kod z już
+# zmniejszoną wartością (baza + połowa Fibo/Płytki), a FIBO_SPLIT_CODES
+# wskazuje drugą połowę, liczoną do brygady FIBO/boazeria. Tylko Toaleta/
+# Łazienka Komfort/Premium mają taki podział — Standard i Kuchnia nie mają
+# w ogóle Fibo/Płytki wliczonych, więc nie występują w tej mapie.
+FIBO_SPLIT_CODES = {
+    ("toaleta", "komfort"): "toaleta_komfort_fibo_split",
+    ("toaleta", "premium"): "toaleta_premium_fibo_split",
+    ("lazienka", "komfort"): "lazienka_komfort_fibo_split",
+    ("lazienka", "premium"): "lazienka_premium_fibo_split",
+}
 # Boazeria WC/łazienki (sierpień 2026) — jedyny pozostały niezależny, łączalny
 # dodatek: NIE jest wariantem pola Toaleta/Łazienka, tylko osobną flagą, którą
 # można doczepić do dowolnego wyboru (Standard/Komfort/Premium/brak). Fibo i
 # Płytki NIE są już osobnymi dodatkami — ich godziny są wliczone na stałe
-# w warianty Komfort/Premium Toalety i Łazienki (patrz HYDRAULIC_CODES).
-# Ma WŁASNĄ pulę mocy (brygada "Niestandardowe łazienki"), osobną od hydrauliki.
+# w warianty Komfort/Premium Toalety i Łazienki (patrz HYDRAULIC_CODES i
+# FIBO_SPLIT_CODES powyżej). Ma WŁASNĄ pulę mocy (brygada "Niestandardowe
+# łazienki"), osobną od hydrauliki i od brygady FIBO/boazeria.
 WC_ADDON_BOAZERIA_CODE = "wc_addon_boazeria"
 PRYSZNIC_CODE = "prysznic_samodzielny"
 STATYKA_CODE = "statyka_pelna"
@@ -123,6 +137,9 @@ def calculate_hours(equipment: PavilionEquipment, op_hours: dict[str, Decimal] |
         code = HYDRAULIC_CODES.get(("lazienka", key))
         if code:
             hydraulic += _op_hours(op_hours, code, warnings)
+            split_code = FIBO_SPLIT_CODES.get(("lazienka", key))
+            if split_code:
+                fibo_wood += _op_hours(op_hours, split_code, warnings)
         else:
             warnings.append(f"Nierozpoznany wariant łazienki: '{equipment.lazienka}'")
     else:
@@ -131,6 +148,9 @@ def calculate_hours(equipment: PavilionEquipment, op_hours: dict[str, Decimal] |
             code = HYDRAULIC_CODES.get(("toaleta", key))
             if code:
                 hydraulic += _op_hours(op_hours, code, warnings)
+                split_code = FIBO_SPLIT_CODES.get(("toaleta", key))
+                if split_code:
+                    fibo_wood += _op_hours(op_hours, split_code, warnings)
             else:
                 warnings.append(f"Nierozpoznany wariant toalety: '{equipment.toaleta}'")
         if equipment.prysznic:

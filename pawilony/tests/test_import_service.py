@@ -190,10 +190,13 @@ def test_toaleta_variants(operation_times):
     ]
     _, records = analyze_workbook(_build_workbook(rows))
     by_kod = {r["kod"]: r for r in records}
-    # Komfort/Premium mają już wliczone Fibo/Płytki (nie są to osobne dodatki).
+    # Komfort/Premium mają już wliczone Fibo/Płytki (nie są to osobne dodatki),
+    # podzielone 40% hydraulika / 60% brygada FIBO/boazeria.
     assert Decimal(by_kod["X1"]["hydraulic_hours"]) == Decimal("7")
-    assert Decimal(by_kod["X2"]["hydraulic_hours"]) == Decimal("52")
-    assert Decimal(by_kod["X3"]["hydraulic_hours"]) == Decimal("55")
+    assert Decimal(by_kod["X2"]["hydraulic_hours"]) == Decimal("18")
+    assert Decimal(by_kod["X2"]["fibo_wood_hours"]) == Decimal("27")
+    assert Decimal(by_kod["X3"]["hydraulic_hours"]) == Decimal("20")
+    assert Decimal(by_kod["X3"]["fibo_wood_hours"]) == Decimal("30")
 
 
 def test_toaleta_no_longer_accepts_wc_addon_strings(operation_times):
@@ -216,7 +219,8 @@ def test_lazienka_replaces_toaleta_and_prysznic(operation_times):
 def test_kuchnia_sums_with_lazienka(operation_times):
     rows = [_make_row(kod="X1", status="Logistyka", kuchnia="Lux", lazienka="Premium")]
     _, records = analyze_workbook(_build_workbook(rows))
-    assert Decimal(records[0]["hydraulic_hours"]) == Decimal("10") + Decimal("100")
+    assert Decimal(records[0]["hydraulic_hours"]) == Decimal("10") + Decimal("40")
+    assert Decimal(records[0]["fibo_wood_hours"]) == Decimal("60")
 
 
 def test_statyka_and_kratownica_together_is_conflict(operation_times):
