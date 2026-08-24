@@ -240,8 +240,14 @@ class ImportUploadView(LoginRequiredMixin, View):
         )
 
         try:
+            config = get_active_configuration()
+            exclude_od_reki = config.exclude_od_reki_before_production
+        except NoActiveConfigurationError:
+            exclude_od_reki = True
+
+        try:
             batch.file.open("rb")
-            report, records = analyze_workbook(batch.file)
+            report, records = analyze_workbook(batch.file, exclude_od_reki_before_production=exclude_od_reki)
             batch.file.close()
         except ImportAnalysisError as exc:
             batch.status = ImportBatch.Status.FAILED

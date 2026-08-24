@@ -80,8 +80,17 @@ def _cell_value(row: tuple, field_map: dict, field_name: str):
     return row[idx]
 
 
-def analyze_workbook(file_obj) -> tuple[ImportReport, list[dict]]:
-    """Parsuje i waliduje skoroszyt. Nie zapisuje niczego do bazy."""
+def analyze_workbook(
+    file_obj, exclude_od_reki_before_production: bool = True
+) -> tuple[ImportReport, list[dict]]:
+    """
+    Parsuje i waliduje skoroszyt. Nie zapisuje niczego do bazy.
+
+    `exclude_od_reki_before_production` steruje przełącznikiem z Konfiguracji
+    mocy produkcyjnych: gdy True (domyślnie), pawilony 'Od ręki' nie liczą się
+    do kolejki, dopóki nie mają statusu Produkcja Zabrze/Czekanów. Gdy False,
+    'Od ręki' liczy się tak samo jak 'Zamówiony' na każdym aktywnym statusie.
+    """
     try:
         workbook = openpyxl.load_workbook(file_obj, read_only=True, data_only=True)
     except Exception as exc:  # noqa: BLE001 — chcemy czytelny komunikat, nie surowy traceback
@@ -249,7 +258,8 @@ def analyze_workbook(file_obj) -> tuple[ImportReport, list[dict]]:
         # Produkcja Zabrze albo Produkcja Czekanów — samo "Logistyka" (mimo że
         # jest statusem aktywnym dla pawilonów "Zamówiony") ich jeszcze nie liczy.
         od_reki_excluded = (
-            is_active_status
+            exclude_od_reki_before_production
+            and is_active_status
             and _is_od_reki(rodzaj_norm)
             and status_result.canonical not in OD_REKI_ALLOWED_STATUSES
         )

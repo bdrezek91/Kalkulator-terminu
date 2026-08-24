@@ -36,9 +36,10 @@ class CapacityConfigurationAdmin(admin.ModelAdmin):
         "custom_bathroom_workers",
         "hours_per_worker_week",
         "safety_buffer_percent",
+        "exclude_od_reki_before_production",
         "updated_at",
     )
-    list_editable = ("is_active",)
+    list_editable = ("is_active", "exclude_od_reki_before_production")
     readonly_fields = (
         "effective_general_capacity",
         "effective_hydraulic_capacity_hours",

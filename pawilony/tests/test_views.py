@@ -109,3 +109,37 @@ def test_import_upload_flow(client, django_user_model, operation_times):
     assert batch.status == ImportBatch.Status.COMMITTED
     assert batch.is_active_snapshot is True
     assert PavilionSnapshot.objects.filter(import_batch=batch, is_counted=True).count() == 1
+
+
+def test_import_upload_honors_od_reki_toggle(client, django_user_model, operation_times, active_config):
+    active_config.exclude_od_reki_before_production = False
+    active_config.save(update_fields=["exclude_od_reki_before_production"])
+
+    user = django_user_model.objects.create_user(username="admin4", password="secret123")
+    client.login(username="admin4", password="secret123")
+
+    header = [
+        "Kod", "Nazwa", "Typ", "Stan zasobów", "Ilość dostępna", "Jm",
+        "01. ODDZIAŁ (Atrybut)", "02. RODZAJ (Atrybut)", "03. STATUS PROCESU (Atrybut)",
+        "07. TERMIN REALIZ. (Atrybut)", "23. PŁYTY NIESTANDAR (Atrybut)",
+        "25. PEŁNA/STATYKA (Atrybut)", "24. KRATOWNICA (Atrybut)", "26. KUCHNIA (Atrybut)",
+        "28. PRYSZNIC (Atrybut)", "27. TOALETA (Atrybut)", "30. STOLARKA NST (Atrybut)",
+        "32. ŻALUZJE FASADOWE (Atrybut)", "31. ROLETY (Atrybut)", "34. ŁAZIENKA (Atrybut)",
+        "33. INNE NIESTANDARD (Atrybut)",
+    ]
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Lista zasobów"
+    ws.append(header)
+    # "Od ręki" na Logistyce — z wyłączonym przełącznikiem powinno się liczyć.
+    ws.append(["K1", "Pawilon testowy", "TZ", "Brak towaru", 1, "szt", "Zabrze", "Od ręki", "Logistyka"] + [""] * 12)
+    buf = io.BytesIO()
+    wb.save(buf)
+    buf.seek(0)
+    buf.name = "test_import.xlsx"
+
+    response = client.post(reverse("pawilony:import_upload"), {"file": buf}, format="multipart")
+    assert response.status_code == 302
+    batch = ImportBatch.objects.latest("uploaded_at")
+    assert batch.report["od_reki_excluded_count"] == 0
+    assert batch.report["records"][0]["is_counted"] is True

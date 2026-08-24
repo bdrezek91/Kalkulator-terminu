@@ -132,6 +132,14 @@ def test_od_reki_ambiguous_rodzaj_still_excluded_in_logistyka(operation_times):
     assert records[0]["od_reki_excluded"] is True
 
 
+def test_od_reki_toggle_off_counts_on_logistyka(operation_times):
+    rows = [_make_row(kod="X1", rodzaj="Od ręki", status="Logistyka")]
+    report, records = analyze_workbook(_build_workbook(rows), exclude_od_reki_before_production=False)
+    assert records[0]["is_counted"] is True
+    assert records[0]["od_reki_excluded"] is False
+    assert report.od_reki_excluded_count == 0
+
+
 def test_statyka_hours_multiplied_by_total_project_modules(operation_times):
     rows = [
         _make_row(kod="X1", nazwa="Pawilon 10x3 nr projektu 1/1/2024 (MODUŁ 1)",

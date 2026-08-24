@@ -92,6 +92,16 @@ class CapacityConfiguration(models.Model):
         default=24,
         verbose_name="Próg nieaktualności danych (godziny)",
     )
+    exclude_od_reki_before_production = models.BooleanField(
+        default=True,
+        verbose_name="Wyklucz 'Od ręki' z kolejki przed statusem produkcji",
+        help_text=(
+            "Gdy włączone: pawilony o Rodzaju 'Od ręki' nie liczą się do kolejki, "
+            "dopóki nie mają statusu Produkcja Zabrze albo Produkcja Czekanów "
+            "(samo Logistyka ich jeszcze nie liczy). Wyłącz, żeby wrócić do liczenia "
+            "'Od ręki' na każdym aktywnym statusie, tak jak 'Zamówiony'."
+        ),
+    )
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
