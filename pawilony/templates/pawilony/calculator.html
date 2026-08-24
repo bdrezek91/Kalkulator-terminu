@@ -33,11 +33,6 @@
                     </div>
 
                     <p class="form-text mt-0 mb-2">Godziny Fibo/Płytki są już wliczone w warianty Komfort/Premium powyżej.</p>
-                    <div class="form-check mb-3">
-                        {{ form.wc_addon_boazeria }}
-                        <label class="form-check-label" for="{{ form.wc_addon_boazeria.id_for_label }}">{{ form.wc_addon_boazeria.label }}</label>
-                        <div class="form-text">To inna pozycja niż „Boazeria” w sekcji Wykończenie (ta dotyczy ścian pawilonu, osobna brygada).</div>
-                    </div>
 
                     <h2 class="h6 text-uppercase text-muted mt-4">Konstrukcja</h2>
                     <div class="mb-3">
@@ -124,7 +119,6 @@
                     <li>Hydraulicy: {{ hours_result.hydraulic_hours }} h</li>
                     <li>Spawacze: {{ hours_result.welding_hours }} h</li>
                     <li>FIBO/boazeria: {{ hours_result.fibo_wood_hours }} h</li>
-                    <li>Niestandardowe łazienki: {{ hours_result.custom_bathroom_hours }} h</li>
                     <li class="text-muted">Informacyjnie (nie ogranicza terminu w MVP): {{ hours_result.informational_hours }} h</li>
                 </ul>
 

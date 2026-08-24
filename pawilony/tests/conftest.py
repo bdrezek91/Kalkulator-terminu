@@ -13,7 +13,6 @@ def work_centers(db):
         (WorkCenter.Code.HYDRAULIC, "Hydraulicy"),
         (WorkCenter.Code.WELDING, "Spawacze"),
         (WorkCenter.Code.FIBO_WOOD, "FIBO / boazeria"),
-        (WorkCenter.Code.CUSTOM_BATHROOM, "Niestandardowe łazienki"),
     ]:
         centers[code], _ = WorkCenter.objects.get_or_create(code=code, defaults={"name": name})
     return centers
@@ -29,7 +28,6 @@ def operation_times(work_centers):
         ("toaleta_komfort_fibo_split", "Toaleta Komfort: Fibo/Płytki (60%)", WorkCenter.Code.FIBO_WOOD, "27", True),
         ("toaleta_premium", "Toaleta Premium", WorkCenter.Code.HYDRAULIC, "20", True),
         ("toaleta_premium_fibo_split", "Toaleta Premium: Fibo/Płytki (60%)", WorkCenter.Code.FIBO_WOOD, "30", True),
-        ("wc_addon_boazeria", "WC/łazienka: Boazeria (dodatkowo)", WorkCenter.Code.CUSTOM_BATHROOM, "150", True),
         ("lazienka_standard", "Łazienka Standard", WorkCenter.Code.HYDRAULIC, "7", True),
         ("lazienka_komfort", "Łazienka Komfort", WorkCenter.Code.HYDRAULIC, "36", True),
         ("lazienka_komfort_fibo_split", "Łazienka Komfort: Fibo/Płytki (60%)", WorkCenter.Code.FIBO_WOOD, "54", True),
@@ -69,7 +67,6 @@ def active_config(db):
         hydraulic_workers=8,
         welding_workers=8,
         fibo_wood_workers=3,
-        custom_bathroom_workers=3,
         hours_per_worker_week=Decimal("40"),
         safety_buffer_percent=Decimal("15"),
         stale_data_warning_hours=24,

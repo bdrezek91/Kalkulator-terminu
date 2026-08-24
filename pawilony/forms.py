@@ -23,10 +23,6 @@ class CalculatorForm(forms.Form):
         required=False, label="Samodzielny prysznic",
         widget=forms.CheckboxInput(attrs={"class": "form-check-input", "id": "id_prysznic"}),
     )
-    wc_addon_boazeria = forms.BooleanField(
-        required=False, label="Boazeria WC/łazienki (dodatkowo)",
-        widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
-    )
     pelna_statyka = forms.BooleanField(
         required=False, label="Pełna konstrukcja / statyka",
         widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),

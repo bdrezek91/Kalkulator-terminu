@@ -21,26 +21,18 @@ HYDRAULIC_CODES = {
     ("lazienka", "premium"): "lazienka_premium",
 }
 # Godziny Fibo/Płytki wliczone na stałe w warianty Komfort/Premium Toalety
-# i Łazienki (nie są osobnymi dodatkami) są DZIELONE 50/50 między hydraulikę
+# i Łazienki (nie są osobnymi dodatkami) są DZIELONE 40%/60% między hydraulikę
 # a brygadę FIBO/boazeria — HYDRAULIC_CODES powyżej wskazuje na kod z już
-# zmniejszoną wartością (baza + połowa Fibo/Płytki), a FIBO_SPLIT_CODES
-# wskazuje drugą połowę, liczoną do brygady FIBO/boazeria. Tylko Toaleta/
-# Łazienka Komfort/Premium mają taki podział — Standard i Kuchnia nie mają
-# w ogóle Fibo/Płytki wliczonych, więc nie występują w tej mapie.
+# zmniejszoną wartością (40%), a FIBO_SPLIT_CODES wskazuje pozostałe 60%,
+# liczone do brygady FIBO/boazeria. Tylko Toaleta/Łazienka Komfort/Premium
+# mają taki podział — Standard i Kuchnia nie mają w ogóle Fibo/Płytki
+# wliczonych, więc nie występują w tej mapie.
 FIBO_SPLIT_CODES = {
     ("toaleta", "komfort"): "toaleta_komfort_fibo_split",
     ("toaleta", "premium"): "toaleta_premium_fibo_split",
     ("lazienka", "komfort"): "lazienka_komfort_fibo_split",
     ("lazienka", "premium"): "lazienka_premium_fibo_split",
 }
-# Boazeria WC/łazienki (sierpień 2026) — jedyny pozostały niezależny, łączalny
-# dodatek: NIE jest wariantem pola Toaleta/Łazienka, tylko osobną flagą, którą
-# można doczepić do dowolnego wyboru (Standard/Komfort/Premium/brak). Fibo i
-# Płytki NIE są już osobnymi dodatkami — ich godziny są wliczone na stałe
-# w warianty Komfort/Premium Toalety i Łazienki (patrz HYDRAULIC_CODES i
-# FIBO_SPLIT_CODES powyżej). Ma WŁASNĄ pulę mocy (brygada "Niestandardowe
-# łazienki"), osobną od hydrauliki i od brygady FIBO/boazeria.
-WC_ADDON_BOAZERIA_CODE = "wc_addon_boazeria"
 PRYSZNIC_CODE = "prysznic_samodzielny"
 STATYKA_CODE = "statyka_pelna"
 KRATOWNICA_CODE = "kratownica"
@@ -78,9 +70,6 @@ class PavilionEquipment:
     module_count: int = 1
     fibo: bool = False
     boazeria: bool = False
-    # Niezależny dodatek do WC/łazienki (dowolny wariant), osobna pula mocy —
-    # nie mylić z `fibo`/`boazeria` powyżej (brygada FIBO/boazeria, ściany pawilonu).
-    wc_addon_boazeria: bool = False
     stolarka_nst: bool = False
     zaluzje_fasadowe: bool = False
     rolety: bool = False
@@ -91,7 +80,6 @@ class HoursResult:
     hydraulic_hours: Decimal = Decimal("0")
     welding_hours: Decimal = Decimal("0")
     fibo_wood_hours: Decimal = Decimal("0")
-    custom_bathroom_hours: Decimal = Decimal("0")
     informational_hours: Decimal = Decimal("0")
     warnings: list[str] = field(default_factory=list)
 
@@ -101,7 +89,6 @@ class HoursResult:
             self.hydraulic_hours > 0
             or self.welding_hours > 0
             or self.fibo_wood_hours > 0
-            or self.custom_bathroom_hours > 0
         )
 
 
@@ -121,7 +108,6 @@ def calculate_hours(equipment: PavilionEquipment, op_hours: dict[str, Decimal] |
     hydraulic = Decimal("0")
     welding = Decimal("0")
     fibo_wood = Decimal("0")
-    custom_bathroom = Decimal("0")
     informational = Decimal("0")
 
     if equipment.kuchnia:
@@ -156,10 +142,6 @@ def calculate_hours(equipment: PavilionEquipment, op_hours: dict[str, Decimal] |
         if equipment.prysznic:
             hydraulic += _op_hours(op_hours, PRYSZNIC_CODE, warnings)
 
-    # Dodatek Boazeria WC/łazienki — niezależny od wariantu (Toaleta lub Łazienka).
-    if equipment.wc_addon_boazeria:
-        custom_bathroom += _op_hours(op_hours, WC_ADDON_BOAZERIA_CODE, warnings)
-
     module_count = max(equipment.module_count, 1)
     if equipment.pelna_statyka:
         welding += _op_hours(op_hours, STATYKA_CODE, warnings) * module_count
@@ -182,7 +164,6 @@ def calculate_hours(equipment: PavilionEquipment, op_hours: dict[str, Decimal] |
         hydraulic_hours=hydraulic,
         welding_hours=welding,
         fibo_wood_hours=fibo_wood,
-        custom_bathroom_hours=custom_bathroom,
         informational_hours=informational,
         warnings=warnings,
     )

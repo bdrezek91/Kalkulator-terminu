@@ -68,7 +68,6 @@ class ImportReport:
     counted_hydraulic_hours: str = "0"
     counted_welding_hours: str = "0"
     counted_fibo_wood_hours: str = "0"
-    counted_custom_bathroom_hours: str = "0"
     custom_count: int = 0
     standard_count: int = 0
 
@@ -143,7 +142,6 @@ def analyze_workbook(
     hydraulic_total = Decimal("0")
     welding_total = Decimal("0")
     fibo_wood_total = Decimal("0")
-    custom_bathroom_total = Decimal("0")
     custom_count = 0
     standard_count = 0
 
@@ -327,14 +325,12 @@ def analyze_workbook(
         record_hydraulic = hours_result.hydraulic_hours if is_counted else Decimal("0")
         record_welding = hours_result.welding_hours if is_counted else Decimal("0")
         record_fibo_wood = hours_result.fibo_wood_hours if is_counted else Decimal("0")
-        record_custom_bathroom = hours_result.custom_bathroom_hours if is_counted else Decimal("0")
         is_custom = is_counted and hours_result.is_custom
 
         if is_counted:
             hydraulic_total += record_hydraulic
             welding_total += record_welding
             fibo_wood_total += record_fibo_wood
-            custom_bathroom_total += record_custom_bathroom
             if is_custom:
                 custom_count += 1
             else:
@@ -383,7 +379,6 @@ def analyze_workbook(
                 "hydraulic_hours": str(record_hydraulic),
                 "welding_hours": str(record_welding),
                 "fibo_wood_hours": str(record_fibo_wood),
-                "custom_bathroom_hours": str(record_custom_bathroom),
                 "conflict_reasons": conflict_reasons,
                 "warnings": warnings,
             }
@@ -392,7 +387,6 @@ def analyze_workbook(
     report.counted_hydraulic_hours = str(hydraulic_total)
     report.counted_welding_hours = str(welding_total)
     report.counted_fibo_wood_hours = str(fibo_wood_total)
-    report.counted_custom_bathroom_hours = str(custom_bathroom_total)
     report.custom_count = custom_count
     report.standard_count = standard_count
 
@@ -441,7 +435,6 @@ def commit_batch(batch: ImportBatch, records: list[dict], user) -> ImportBatch:
             hydraulic_hours=Decimal(r["hydraulic_hours"]),
             welding_hours=Decimal(r["welding_hours"]),
             fibo_wood_hours=Decimal(r["fibo_wood_hours"]),
-            custom_bathroom_hours=Decimal(r["custom_bathroom_hours"]),
             conflict_reasons=r["conflict_reasons"],
             warnings=r["warnings"],
             source_row_number=r["source_row_number"],

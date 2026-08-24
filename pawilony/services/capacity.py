@@ -31,7 +31,6 @@ def manual_adjustment_totals() -> dict[str, Decimal]:
         "HYDRAULIC": Decimal("0"),
         "WELDING": Decimal("0"),
         "FIBO_WOOD": Decimal("0"),
-        "CUSTOM_BATHROOM": Decimal("0"),
     }
     qs = ManualBacklogAdjustment.objects.filter(is_active=True)
     for adj in qs:
@@ -47,7 +46,6 @@ def compute_backlog_totals(batch: ImportBatch | None) -> BacklogTotals:
             hydraulic_hours=manual["HYDRAULIC"],
             welding_hours=manual["WELDING"],
             fibo_wood_hours=manual["FIBO_WOOD"],
-            custom_bathroom_hours=manual["CUSTOM_BATHROOM"],
         )
 
     counted = batch.pavilions.filter(is_counted=True)
@@ -59,7 +57,6 @@ def compute_backlog_totals(batch: ImportBatch | None) -> BacklogTotals:
         hydraulic=Sum("hydraulic_hours"),
         welding=Sum("welding_hours"),
         fibo_wood=Sum("fibo_wood_hours"),
-        custom_bathroom=Sum("custom_bathroom_hours"),
     )
 
     return BacklogTotals(
@@ -67,7 +64,6 @@ def compute_backlog_totals(batch: ImportBatch | None) -> BacklogTotals:
         hydraulic_hours=(sums["hydraulic"] or Decimal("0")) + manual["HYDRAULIC"],
         welding_hours=(sums["welding"] or Decimal("0")) + manual["WELDING"],
         fibo_wood_hours=(sums["fibo_wood"] or Decimal("0")) + manual["FIBO_WOOD"],
-        custom_bathroom_hours=(sums["custom_bathroom"] or Decimal("0")) + manual["CUSTOM_BATHROOM"],
     )
 
 
@@ -98,9 +94,6 @@ class EquipmentBreakdown:
     kratownica_count: int = 0
     fibo_count: int = 0
     boazeria_count: int = 0
-    # Niezależny dodatek WC/łazienki (własna pula mocy) — patrz uwaga w
-    # compute_equipment_breakdown o braku kolumny źródłowej w Optimie.
-    wc_addon_boazeria_count: int = 0
 
 
 def _value_counts(queryset, field_name: str) -> dict[str, int]:
@@ -135,7 +128,4 @@ def compute_equipment_breakdown(batch: ImportBatch | None) -> EquipmentBreakdown
         kratownica_count=counted.filter(kratownica=True).count(),
         fibo_count=counted.filter(fibo=True).count(),
         boazeria_count=counted.filter(boazeria=True).count(),
-        # Eksport Optima nie ma jeszcze osobnej kolumny dla tego dodatku —
-        # zawsze 0, dopóki firma nie doda odpowiedniego atrybutu do eksportu.
-        wc_addon_boazeria_count=counted.filter(wc_boazeria=True).count(),
     )

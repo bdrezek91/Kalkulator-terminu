@@ -33,7 +33,6 @@ class CapacityConfigurationAdmin(admin.ModelAdmin):
         "hydraulic_workers",
         "welding_workers",
         "fibo_wood_workers",
-        "custom_bathroom_workers",
         "hours_per_worker_week",
         "safety_buffer_percent",
         "exclude_od_reki_before_production",
@@ -45,7 +44,6 @@ class CapacityConfigurationAdmin(admin.ModelAdmin):
         "effective_hydraulic_capacity_hours",
         "effective_welding_capacity_hours",
         "effective_fibo_wood_capacity_hours",
-        "effective_custom_bathroom_capacity_hours",
     )
 
 

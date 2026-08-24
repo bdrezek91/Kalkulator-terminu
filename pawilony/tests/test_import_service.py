@@ -206,7 +206,6 @@ def test_toaleta_no_longer_accepts_wc_addon_strings(operation_times):
     rows = [_make_row(kod="X1", status="Logistyka", toaleta="Fibo")]
     report, records = analyze_workbook(_build_workbook(rows))
     assert records[0]["toaleta"] == ""
-    assert Decimal(records[0]["custom_bathroom_hours"]) == Decimal("0")
     assert len(report.unrecognized_values) == 1
 
 

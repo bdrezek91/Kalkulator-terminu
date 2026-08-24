@@ -135,27 +135,6 @@
                 {% endif %}
             </div>
         </div>
-
-        <div class="card mb-4">
-            <div class="card-body">
-                <h2 class="h6">Niestandardowe łazienki</h2>
-                <p class="small text-muted mb-2">
-                    Osobna pula mocy, niezależna od hydrauliki i od brygady FIBO/boazeria —
-                    dotyczy wyłącznie dodatku Boazeria WC/łazienki (dowolny wariant
-                    Toalety/Łazienki). Fibo/Płytki wliczone w warianty Komfort/Premium
-                    liczą się do hydrauliki i brygady FIBO/boazeria (patrz karta obok).
-                </p>
-                <table class="table table-sm mb-2">
-                    <tbody>
-                        <tr><td>Boazeria (WC/łazienka)</td><td class="text-end">{{ breakdown.wc_addon_boazeria_count }}</td></tr>
-                    </tbody>
-                </table>
-                <p class="mb-0"><strong>Suma godzin w kolejce:</strong> {{ backlog.custom_bathroom_hours }} h</p>
-                {% if manual_totals.CUSTOM_BATHROOM %}
-                <p class="small text-muted mb-0">w tym {{ manual_totals.CUSTOM_BATHROOM }} h z ręcznej korekty administratora</p>
-                {% endif %}
-            </div>
-        </div>
     </div>
 </div>
 

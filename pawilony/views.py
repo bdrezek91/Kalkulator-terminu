@@ -81,7 +81,6 @@ class CalculatorView(View):
             module_count=cleaned.get("module_count") or 1,
             fibo=cleaned.get("fibo", False),
             boazeria=cleaned.get("boazeria", False),
-            wc_addon_boazeria=cleaned.get("wc_addon_boazeria", False),
             stolarka_nst=cleaned.get("stolarka_nst", False),
             zaluzje_fasadowe=cleaned.get("zaluzje_fasadowe", False),
             rolety=cleaned.get("rolety", False),

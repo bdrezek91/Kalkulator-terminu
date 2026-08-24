@@ -10,7 +10,6 @@ WORK_CENTERS = [
     (WorkCenter.Code.HYDRAULIC, "Hydraulicy"),
     (WorkCenter.Code.WELDING, "Spawacze"),
     (WorkCenter.Code.FIBO_WOOD, "FIBO / boazeria"),
-    (WorkCenter.Code.CUSTOM_BATHROOM, "Niestandardowe łazienki"),
 ]
 
 # code, name, work_center, hours, affects_term
@@ -34,9 +33,6 @@ OPERATION_TIMES = [
     ("toaleta_komfort_fibo_split", "Toaleta Komfort: Fibo/Płytki (60%)", WorkCenter.Code.FIBO_WOOD, "27", True),
     ("toaleta_premium", "Toaleta Premium", WorkCenter.Code.HYDRAULIC, "20", True),
     ("toaleta_premium_fibo_split", "Toaleta Premium: Fibo/Płytki (60%)", WorkCenter.Code.FIBO_WOOD, "30", True),
-    # Boazeria WC/łazienki jest jedynym pozostałym niezależnym, łączalnym dodatkiem
-    # (dowolny wariant Toalety/Łazienki) — ma WŁASNĄ pulę mocy (CUSTOM_BATHROOM).
-    ("wc_addon_boazeria", "WC/łazienka: Boazeria (dodatkowo)", WorkCenter.Code.CUSTOM_BATHROOM, "150", True),
     ("lazienka_standard", "Łazienka Standard", WorkCenter.Code.HYDRAULIC, "7", True),
     ("lazienka_komfort", "Łazienka Komfort", WorkCenter.Code.HYDRAULIC, "36", True),
     ("lazienka_komfort_fibo_split", "Łazienka Komfort: Fibo/Płytki (60%)", WorkCenter.Code.FIBO_WOOD, "54", True),
@@ -83,7 +79,6 @@ class Command(BaseCommand):
                 hydraulic_workers=6,
                 welding_workers=5,
                 fibo_wood_workers=2,
-                custom_bathroom_workers=3,
                 hours_per_worker_week=Decimal("40"),
                 safety_buffer_percent=Decimal("15"),
                 stale_data_warning_hours=24,
