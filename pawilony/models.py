@@ -74,8 +74,8 @@ class CapacityConfiguration(models.Model):
         max_digits=8, decimal_places=2, default=Decimal("45"),
         verbose_name="Ogólna produkcja (pawilonów/tydzień)",
     )
-    hydraulic_workers = models.PositiveIntegerField(default=8, verbose_name="Liczba hydraulików")
-    welding_workers = models.PositiveIntegerField(default=7, verbose_name="Liczba spawaczy")
+    hydraulic_workers = models.PositiveIntegerField(default=6, verbose_name="Liczba hydraulików")
+    welding_workers = models.PositiveIntegerField(default=5, verbose_name="Liczba spawaczy")
     fibo_wood_workers = models.PositiveIntegerField(default=2, verbose_name="Liczba os. FIBO/boazeria")
     custom_bathroom_workers = models.PositiveIntegerField(
         default=3, verbose_name="Liczba os. niestandardowe łazienki"
