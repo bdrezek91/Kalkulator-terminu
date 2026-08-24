@@ -2,8 +2,8 @@ from django import forms
 from django.conf import settings
 from django.core.exceptions import ValidationError
 
-KUCHNIA_CHOICES = [("", "brak"), ("Standard", "Standard"), ("Lux", "Lux")]
-WARIANT_CHOICES = [("", "brak"), ("Standard", "Standard"), ("Komfort", "Komfort"), ("Premium", "Premium")]
+KUCHNIA_CHOICES = [("", "Brak"), ("Standard", "Standard"), ("Lux", "Lux")]
+WARIANT_CHOICES = [("", "Brak"), ("Standard", "Standard"), ("Komfort", "Komfort"), ("Premium", "Premium")]
 
 
 class CalculatorForm(forms.Form):
