@@ -31,6 +31,15 @@ from pawilony.services.week_calculation import BRIGADE_LABELS, calculate_earlies
 logger = logging.getLogger("pawilony.audit")
 
 
+def _weeks_word(n: int) -> str:
+    """Polska odmiana słowa 'tydzień' dla liczby n (1, 2-4, 5+ z wyjątkiem 12-14)."""
+    if n == 1:
+        return "tydzień"
+    if n % 10 in (2, 3, 4) and n % 100 not in (12, 13, 14):
+        return "tygodnie"
+    return "tygodni"
+
+
 def _client_ip(request) -> str:
     return request.META.get("REMOTE_ADDR", "unknown")
 
@@ -105,6 +114,7 @@ class CalculatorView(View):
                     "key": outcome.key,
                     "label": BRIGADE_LABELS[outcome.key],
                     "weeks": outcome.weeks,
+                    "weeks_word": _weeks_word(outcome.weeks),
                     "required": outcome.required,
                     "is_bottleneck": outcome.key == week_result.bottleneck_key,
                     "current_backlog": outcome.current_backlog,

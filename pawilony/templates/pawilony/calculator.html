@@ -109,7 +109,7 @@
 
                 <table class="table table-sm mt-3">
                     <thead>
-                        <tr><th>Brygada</th><th>Wymagany tydzień</th></tr>
+                        <tr><th>Brygada</th><th>Ilość tygodni oczekiwania</th></tr>
                     </thead>
                     <tbody>
                         {% for row in brigade_rows %}
@@ -117,7 +117,7 @@
                             <td>{{ row.label }}</td>
                             <td>
                                 {% if row.required %}
-                                    tydzień {{ row.weeks }}
+                                    {{ row.weeks }} {{ row.weeks_word }}
                                     {% if row.is_bottleneck %} — wąskie gardło{% endif %}
                                 {% else %}
                                     nie dotyczy (brak wyposażenia tej brygady)
