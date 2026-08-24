@@ -163,6 +163,48 @@ przez Caddy, zamiast wpaść w pętlę przekierowań.
 > się tak samo jak Twoje (`app`, `db`) — w razie kolizji zmień nazwę usługi
 > w `docker-compose.yml` na coś unikalnego dla tego serwera.
 
+### Wariant: wspólna domena z prefiksem ścieżki (bez osobnej subdomeny)
+
+Jeśli zamiast osobnej subdomeny (`kalkulator.twojadomena.pl`) kalkulator ma
+być wystawiony pod ścieżką na już istniejącej domenie (np.
+`twojadomena.pl/kalkulator-terminu/`), Caddyfile musi zdjąć prefiks przed
+przekazaniem żądania dalej (`handle_path`), bo aplikacja Django nie wie nic
+o prefiksie i sama liczy się od "/":
+
+```caddyfile
+twojadomena.pl {
+    handle_path /kalkulator-terminu/* {
+        reverse_proxy kalkulator-web:8000
+    }
+    # Kalkulator serwuje statyki (Whitenoise) pod bezwzględnym /static/,
+    # niezależnie od prefiksu ścieżki, na jakiej stoi strona — dlatego
+    # osobny blok bez zdejmowania prefiksu.
+    handle /static/* {
+        reverse_proxy kalkulator-web:8000
+    }
+    handle {
+        reverse_proxy <inna-aplikacja-na-tej-domenie>
+    }
+}
+```
+
+**To nie wystarczy samo w sobie.** Bez dodatkowej konfiguracji po stronie
+Django wszystkie linki generowane przez `{% url %}`/`reverse()`/`redirect()`
+(np. „Logowanie administratora", panel Django-admin) będą bezwzględne od
+korzenia domeny (`/admin-panel/login/`), a nie `/kalkulator-terminu/admin-panel/login/`
+— Caddy nie dopasuje takiego żądania do reguły kalkulatora i klient trafi do
+**innej aplikacji** wystawionej na tej samej domenie (`handle { ... }` na
+końcu). Ustaw w `.env`:
+
+```
+DJANGO_FORCE_SCRIPT_NAME=/kalkulator-terminu
+```
+
+`FORCE_SCRIPT_NAME` dopisuje ten prefiks do wszystkich URL-i generowanych
+przez Django (nie dotyczy `STATIC_URL`/Whitenoise — te zostają pod
+bezwzględnym `/static/`, zgodnie z osobnym blokiem `handle /static/*`
+powyżej). Zostaw tę zmienną pustą/niewpisaną w wariancie z osobną subdomeną.
+
 ## Aktualizacja bez utraty danych
 
 ```bash

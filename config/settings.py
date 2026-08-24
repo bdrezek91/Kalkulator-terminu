@@ -24,6 +24,16 @@ DEBUG = env.bool("DJANGO_DEBUG", default=False)
 ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=["localhost", "127.0.0.1"])
 CSRF_TRUSTED_ORIGINS = env.list("DJANGO_CSRF_TRUSTED_ORIGINS", default=[])
 
+# Gdy aplikacja stoi za reverse proxy pod ścieżką inną niż "/" (np. Caddy
+# `handle_path /kalkulator-terminu/*` zdejmujący prefiks przed przekazaniem
+# żądania dalej) — Django samo tego nie wie i generuje bezwzględne URL-e
+# (reverse(), {% url %}, redirect()) od korzenia domeny, co łamie routing na
+# współdzielonej domenie (żądanie bez prefiksu trafia do innej aplikacji
+# obsługiwanej przez tę samą domenę). FORCE_SCRIPT_NAME dopisuje prefiks do
+# wszystkich takich URL-i. STATIC_URL/Whitenoise nie są tym objęte — Caddy
+# obsługuje /static/* osobnym blokiem bez zdejmowania prefiksu.
+FORCE_SCRIPT_NAME = env("DJANGO_FORCE_SCRIPT_NAME", default=None) or None
+
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",

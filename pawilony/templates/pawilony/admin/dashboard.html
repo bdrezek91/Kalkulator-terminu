@@ -60,9 +60,9 @@
             <div class="card-body">
                 <h2 class="h6">Konfiguracja</h2>
                 <p class="small text-muted">Czasy operacji, moce produkcyjne, bufor i ręczne korekty edytujesz w panelu Django.</p>
-                <a class="btn btn-outline-secondary" href="/django-admin/pawilony/operationtime/">Czasy operacji</a>
-                <a class="btn btn-outline-secondary" href="/django-admin/pawilony/capacityconfiguration/">Moce produkcyjne</a>
-                <a class="btn btn-outline-secondary" href="/django-admin/pawilony/manualbacklogadjustment/">Ręczne korekty</a>
+                <a class="btn btn-outline-secondary" href="{% url 'admin:pawilony_operationtime_changelist' %}">Czasy operacji</a>
+                <a class="btn btn-outline-secondary" href="{% url 'admin:pawilony_capacityconfiguration_changelist' %}">Moce produkcyjne</a>
+                <a class="btn btn-outline-secondary" href="{% url 'admin:pawilony_manualbacklogadjustment_changelist' %}">Ręczne korekty</a>
             </div>
         </div>
     </div>
