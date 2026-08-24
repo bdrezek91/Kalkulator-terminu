@@ -14,21 +14,36 @@
 
                     <h2 class="h6 text-uppercase text-muted mt-4">Hydraulika</h2>
                     <div class="mb-3">
-                        <label class="form-label">{{ form.kuchnia.label }}</label>
-                        {{ form.kuchnia }}
+                        <label class="form-label d-block">{{ form.kuchnia.label }}</label>
+                        <div class="d-flex flex-wrap gap-2">
+                            {% for radio in form.kuchnia %}
+                            {{ radio.tag }}
+                            <label class="btn btn-outline-light btn-sm" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                            {% endfor %}
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label" for="{{ form.kuchnia_count.id_for_label }}">{{ form.kuchnia_count.label }}</label>
                         {{ form.kuchnia_count }}
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">{{ form.toaleta.label }}</label>
-                        {{ form.toaleta }}
+                        <label class="form-label d-block">{{ form.toaleta.label }}</label>
+                        <div class="d-flex flex-wrap gap-2">
+                            {% for radio in form.toaleta %}
+                            {{ radio.tag }}
+                            <label class="btn btn-outline-light btn-sm" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                            {% endfor %}
+                        </div>
                         <div class="form-text">Nieaktywne, jeśli wybrano łazienkę — łazienka jest kompletem.</div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">{{ form.lazienka.label }}</label>
-                        {{ form.lazienka }}
+                        <label class="form-label d-block">{{ form.lazienka.label }}</label>
+                        <div class="d-flex flex-wrap gap-2">
+                            {% for radio in form.lazienka %}
+                            {{ radio.tag }}
+                            <label class="btn btn-outline-light btn-sm" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                            {% endfor %}
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label" for="{{ form.bathroom_count.id_for_label }}">{{ form.bathroom_count.label }}</label>
@@ -165,18 +180,26 @@
 {% block extra_head %}
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    var lazienka = document.getElementById("id_lazienka");
-    var toaleta = document.getElementById("id_toaleta");
+    var lazienkaRadios = document.querySelectorAll('input[name="lazienka"]');
+    var toaletaRadios = document.querySelectorAll('input[name="toaleta"]');
     var prysznic = document.getElementById("id_prysznic");
+    function lazienkaValue() {
+        for (var i = 0; i < lazienkaRadios.length; i++) {
+            if (lazienkaRadios[i].checked) return lazienkaRadios[i].value;
+        }
+        return "";
+    }
     function sync() {
-        var complete = lazienka && lazienka.value !== "";
-        if (toaleta) toaleta.disabled = complete;
+        var complete = lazienkaValue() !== "";
+        toaletaRadios.forEach(function (r) {
+            r.disabled = complete;
+            if (complete) r.checked = (r.value === "");
+        });
         if (prysznic) prysznic.disabled = complete;
         if (complete && prysznic) prysznic.checked = false;
-        if (complete && toaleta) toaleta.value = "";
     }
-    if (lazienka) {
-        lazienka.addEventListener("change", sync);
+    if (lazienkaRadios.length) {
+        lazienkaRadios.forEach(function (r) { r.addEventListener("change", sync); });
         sync();
     }
 

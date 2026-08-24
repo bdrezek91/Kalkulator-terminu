@@ -9,7 +9,7 @@ WARIANT_CHOICES = [("", "brak"), ("Standard", "Standard"), ("Komfort", "Komfort"
 class CalculatorForm(forms.Form):
     kuchnia = forms.ChoiceField(
         choices=KUCHNIA_CHOICES, required=False, label="Kuchnia",
-        widget=forms.Select(attrs={"class": "form-select"}),
+        widget=forms.RadioSelect(attrs={"class": "btn-check"}),
     )
     kuchnia_count = forms.IntegerField(
         required=False, min_value=1, initial=1, label="Ilość aneksów kuchennych",
@@ -17,11 +17,11 @@ class CalculatorForm(forms.Form):
     )
     toaleta = forms.ChoiceField(
         choices=WARIANT_CHOICES, required=False, label="Toaleta",
-        widget=forms.Select(attrs={"class": "form-select", "id": "id_toaleta"}),
+        widget=forms.RadioSelect(attrs={"class": "btn-check"}),
     )
     lazienka = forms.ChoiceField(
         choices=WARIANT_CHOICES, required=False, label="Łazienka",
-        widget=forms.Select(attrs={"class": "form-select", "id": "id_lazienka"}),
+        widget=forms.RadioSelect(attrs={"class": "btn-check"}),
     )
     bathroom_count = forms.IntegerField(
         required=False, min_value=1, initial=1, label="Ilość łazienek/toalet",
