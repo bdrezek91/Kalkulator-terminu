@@ -32,6 +32,38 @@ def test_toaleta_variants(operation_times):
     assert premium.fibo_wood_hours == Decimal("30")
 
 
+def test_kuchnia_count_multiplies_hours(operation_times):
+    result = calculate_hours(PavilionEquipment(kuchnia="Lux", kuchnia_count=3))
+    assert result.hydraulic_hours == Decimal("10") * 3
+
+
+def test_default_kuchnia_count_is_one(operation_times):
+    result = calculate_hours(PavilionEquipment(kuchnia="Lux"))
+    assert result.hydraulic_hours == Decimal("10")
+
+
+def test_bathroom_count_multiplies_toaleta_hours_including_fibo_split(operation_times):
+    result = calculate_hours(PavilionEquipment(toaleta="Komfort", bathroom_count=2))
+    assert result.hydraulic_hours == Decimal("18") * 2
+    assert result.fibo_wood_hours == Decimal("27") * 2
+
+
+def test_bathroom_count_multiplies_lazienka_hours_including_fibo_split(operation_times):
+    result = calculate_hours(PavilionEquipment(lazienka="Premium", bathroom_count=2))
+    assert result.hydraulic_hours == Decimal("40") * 2
+    assert result.fibo_wood_hours == Decimal("60") * 2
+
+
+def test_bathroom_count_multiplies_prysznic(operation_times):
+    result = calculate_hours(PavilionEquipment(prysznic=True, bathroom_count=3))
+    assert result.hydraulic_hours == Decimal("8") * 3
+
+
+def test_default_bathroom_count_is_one(operation_times):
+    result = calculate_hours(PavilionEquipment(toaleta="Standard"))
+    assert result.hydraulic_hours == Decimal("7")
+
+
 def test_lazienka_replaces_toaleta_and_prysznic(operation_times):
     result = calculate_hours(PavilionEquipment(lazienka="Standard", toaleta="Premium", prysznic=True))
     # tylko łazienka się liczy — 7h, nie 7+55+8

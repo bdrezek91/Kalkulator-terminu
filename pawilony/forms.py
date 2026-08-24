@@ -11,6 +11,10 @@ class CalculatorForm(forms.Form):
         choices=KUCHNIA_CHOICES, required=False, label="Kuchnia",
         widget=forms.Select(attrs={"class": "form-select"}),
     )
+    kuchnia_count = forms.IntegerField(
+        required=False, min_value=1, initial=1, label="Ilość aneksów kuchennych",
+        widget=forms.NumberInput(attrs={"class": "form-control", "style": "max-width: 6rem"}),
+    )
     toaleta = forms.ChoiceField(
         choices=WARIANT_CHOICES, required=False, label="Toaleta",
         widget=forms.Select(attrs={"class": "form-select", "id": "id_toaleta"}),
@@ -18,6 +22,10 @@ class CalculatorForm(forms.Form):
     lazienka = forms.ChoiceField(
         choices=WARIANT_CHOICES, required=False, label="Łazienka",
         widget=forms.Select(attrs={"class": "form-select", "id": "id_lazienka"}),
+    )
+    bathroom_count = forms.IntegerField(
+        required=False, min_value=1, initial=1, label="Ilość łazienek/toalet",
+        widget=forms.NumberInput(attrs={"class": "form-control", "style": "max-width: 6rem"}),
     )
     prysznic = forms.BooleanField(
         required=False, label="Samodzielny prysznic",

@@ -58,9 +58,14 @@ class PavilionEquipment:
     """Znormalizowane wyposażenie pawilonu wykorzystywane do liczenia godzin."""
 
     kuchnia: str | None = None  # 'Standard' | 'Lux' | None
+    # Liczba aneksów kuchennych — mnoży godziny wybranego wariantu Kuchni.
+    kuchnia_count: int = 1
     toaleta: str | None = None  # 'Standard' | 'Komfort' | 'Premium' | None
     lazienka: str | None = None  # 'Standard' | 'Komfort' | 'Premium' | None
     prysznic: bool = False
+    # Liczba łazienek/toalet — mnoży godziny wybranego wariantu Toalety/Łazienki
+    # (w tym wliczoną część Fibo/Płytki) oraz samodzielnego prysznica.
+    bathroom_count: int = 1
     pelna_statyka: bool = False
     kratownica: bool = False
     # Liczba modułów pawilonu (projekty wielomodułowe, np. "MODUŁ 1/2/3" w nazwie) —
@@ -110,22 +115,24 @@ def calculate_hours(equipment: PavilionEquipment, op_hours: dict[str, Decimal] |
     fibo_wood = Decimal("0")
     informational = Decimal("0")
 
+    kuchnia_count = max(equipment.kuchnia_count, 1)
     if equipment.kuchnia:
         key = equipment.kuchnia.strip().lower()
         code = HYDRAULIC_CODES.get(("kuchnia", key))
         if code:
-            hydraulic += _op_hours(op_hours, code, warnings)
+            hydraulic += _op_hours(op_hours, code, warnings) * kuchnia_count
         else:
             warnings.append(f"Nierozpoznany wariant kuchni: '{equipment.kuchnia}'")
 
+    bathroom_count = max(equipment.bathroom_count, 1)
     if equipment.lazienka:
         key = equipment.lazienka.strip().lower()
         code = HYDRAULIC_CODES.get(("lazienka", key))
         if code:
-            hydraulic += _op_hours(op_hours, code, warnings)
+            hydraulic += _op_hours(op_hours, code, warnings) * bathroom_count
             split_code = FIBO_SPLIT_CODES.get(("lazienka", key))
             if split_code:
-                fibo_wood += _op_hours(op_hours, split_code, warnings)
+                fibo_wood += _op_hours(op_hours, split_code, warnings) * bathroom_count
         else:
             warnings.append(f"Nierozpoznany wariant łazienki: '{equipment.lazienka}'")
     else:
@@ -133,14 +140,14 @@ def calculate_hours(equipment: PavilionEquipment, op_hours: dict[str, Decimal] |
             key = equipment.toaleta.strip().lower()
             code = HYDRAULIC_CODES.get(("toaleta", key))
             if code:
-                hydraulic += _op_hours(op_hours, code, warnings)
+                hydraulic += _op_hours(op_hours, code, warnings) * bathroom_count
                 split_code = FIBO_SPLIT_CODES.get(("toaleta", key))
                 if split_code:
-                    fibo_wood += _op_hours(op_hours, split_code, warnings)
+                    fibo_wood += _op_hours(op_hours, split_code, warnings) * bathroom_count
             else:
                 warnings.append(f"Nierozpoznany wariant toalety: '{equipment.toaleta}'")
         if equipment.prysznic:
-            hydraulic += _op_hours(op_hours, PRYSZNIC_CODE, warnings)
+            hydraulic += _op_hours(op_hours, PRYSZNIC_CODE, warnings) * bathroom_count
 
     module_count = max(equipment.module_count, 1)
     if equipment.pelna_statyka:

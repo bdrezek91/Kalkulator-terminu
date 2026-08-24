@@ -18,6 +18,10 @@
                         {{ form.kuchnia }}
                     </div>
                     <div class="mb-3">
+                        <label class="form-label" for="{{ form.kuchnia_count.id_for_label }}">{{ form.kuchnia_count.label }}</label>
+                        {{ form.kuchnia_count }}
+                    </div>
+                    <div class="mb-3">
                         <label class="form-label">{{ form.toaleta.label }}</label>
                         {{ form.toaleta }}
                         <div class="form-text">Nieaktywne, jeśli wybrano łazienkę — łazienka jest kompletem.</div>
@@ -25,6 +29,11 @@
                     <div class="mb-3">
                         <label class="form-label">{{ form.lazienka.label }}</label>
                         {{ form.lazienka }}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="{{ form.bathroom_count.id_for_label }}">{{ form.bathroom_count.label }}</label>
+                        {{ form.bathroom_count }}
+                        <div class="form-text">Mnoży godziny wybranego wariantu Toalety/Łazienki (i samodzielnego prysznica).</div>
                     </div>
                     <div class="form-check mb-3">
                         {{ form.prysznic }}

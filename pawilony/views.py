@@ -73,8 +73,10 @@ class CalculatorView(View):
         cleaned = form.cleaned_data
         equipment = PavilionEquipment(
             kuchnia=cleaned.get("kuchnia") or None,
+            kuchnia_count=cleaned.get("kuchnia_count") or 1,
             toaleta=cleaned.get("toaleta") or None,
             lazienka=cleaned.get("lazienka") or None,
+            bathroom_count=cleaned.get("bathroom_count") or 1,
             prysznic=cleaned.get("prysznic", False),
             pelna_statyka=cleaned.get("pelna_statyka", False),
             kratownica=cleaned.get("kratownica", False),
