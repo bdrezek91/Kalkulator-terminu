@@ -105,8 +105,6 @@
                 <p class="mb-3">
                     od {{ result.week_start|date:"d.m.Y" }} do {{ result.week_end|date:"d.m.Y" }}
                 </p>
-                <p>Wąskie gardło: <strong>{{ bottleneck_label }}</strong></p>
-
                 <table class="table table-sm mt-3">
                     <thead>
                         <tr><th>Brygada</th><th>Ilość tygodni oczekiwania</th></tr>
@@ -118,7 +116,6 @@
                             <td>
                                 {% if row.required %}
                                     {{ row.weeks }} {{ row.weeks_word }}
-                                    {% if row.is_bottleneck %} — wąskie gardło{% endif %}
                                 {% else %}
                                     nie dotyczy (brak wyposażenia tej brygady)
                                 {% endif %}

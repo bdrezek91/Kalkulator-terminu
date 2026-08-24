@@ -122,14 +122,11 @@ class CalculatorView(View):
                 }
             )
 
-        bottleneck_label = BRIGADE_LABELS[week_result.bottleneck_key]
-
         context.update(
             {
                 "result": week_result,
                 "brigade_rows": brigade_rows,
                 "hours_result": hours_result,
-                "bottleneck_label": bottleneck_label,
                 "no_active_import": active_batch is None,
                 "last_import_at": last_import_at,
                 "data_is_stale": data_is_stale,
